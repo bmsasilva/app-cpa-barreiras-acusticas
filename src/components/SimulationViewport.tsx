@@ -801,15 +801,6 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
             </g>
           </g>
         )}
-
-        {/* COTAS E DIMENSÕES */}
-        {toggles.showDimensions && barrier.enabled && (
-          <g className="pointer-events-none text-[10px] fill-slate-400">
-            <text x={barTopPx.x} y={barTopPx.y - 20} textAnchor="middle" fill="#c084fc" fontWeight="bold">
-              δ = {result.pathDifference > 0 ? `+${result.pathDifference.toFixed(3)} m` : `${result.pathDifference.toFixed(3)} m`} (N = {result.fresnelNumber.toFixed(2)})
-            </text>
-          </g>
-        )}
       </svg>
 
       {/* Legenda Flutuante */}
