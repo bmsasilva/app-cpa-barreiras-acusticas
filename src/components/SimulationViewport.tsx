@@ -821,27 +821,11 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
         )}
 
         {/* COTAS E DIMENSÕES */}
-        {toggles.showDimensions && (
+        {toggles.showDimensions && barrier.enabled && (
           <g className="pointer-events-none text-[10px] fill-slate-400">
-            <line
-              x1={srcPx.x}
-              y1={groundYPx + 48}
-              x2={recPx.x}
-              y2={groundYPx + 48}
-              stroke="#64748b"
-              strokeWidth="1.2"
-            />
-            <text x={(srcPx.x + recPx.x) / 2} y={groundYPx + 62} textAnchor="middle" fill="#cbd5e1" fontWeight="bold">
-              Distância direta D₀ = {result.d0.toFixed(1)} m
+            <text x={barTopPx.x} y={barTopPx.y - 20} textAnchor="middle" fill="#c084fc" fontWeight="bold">
+              δ = {result.pathDifference > 0 ? `+${result.pathDifference.toFixed(3)} m` : `${result.pathDifference.toFixed(3)} m`} (N = {result.fresnelNumber.toFixed(2)})
             </text>
-
-            {barrier.enabled && (
-              <g>
-                <text x={barTopPx.x} y={barTopPx.y - 20} textAnchor="middle" fill="#c084fc" fontWeight="bold">
-                  δ = {result.pathDifference > 0 ? `+${result.pathDifference.toFixed(3)} m` : `${result.pathDifference.toFixed(3)} m`} (N = {result.fresnelNumber.toFixed(2)})
-                </text>
-              </g>
-            )}
           </g>
         )}
       </svg>
