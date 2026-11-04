@@ -460,32 +460,7 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           <rect x={barTopPx.x} y="0" width={dimensions.width - barTopPx.x} height={dimensions.height} />
         </clipPath>
 
-        {/* 2. Ondas Refletidas */}
-        {toggles.showReflectedWaves && barrier.enabled && barrier.height > 0.2 && (
-          <g className="pointer-events-none">
-            {incidentRays.map((wave, idx) => {
-              const reflDist = barTopPx.x - srcPx.x;
-              if (wave.radiusPx < reflDist) return null;
-              const reflRadius = wave.radiusPx - reflDist;
-              const reflAlpha = (1 - (curMaterial.alphaW || 0.05)) * wave.opacity * 0.7;
-              if (reflRadius <= 0 || reflAlpha <= 0.05) return null;
-
-              return (
-                <path
-                  key={`refl-${idx}`}
-                  d={`M ${barTopPx.x} ${Math.max(barTopPx.y, srcPx.y - reflRadius)} A ${reflRadius} ${reflRadius} 0 0 0 ${barTopPx.x} ${Math.min(groundYPx, srcPx.y + reflRadius)}`}
-                  fill="none"
-                  stroke="#38bdf8"
-                  strokeWidth="2"
-                  strokeDasharray="4 2"
-                  strokeOpacity={reflAlpha}
-                />
-              );
-            })}
-          </g>
-        )}
-
-        {/* 3. Difração no Topo */}
+        {/* 2. Difração no Topo */}
         {toggles.showDiffractedWaves && barrier.enabled && barrier.height > 0.2 && (
           <g className="pointer-events-none">
             <line
@@ -878,17 +853,9 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           <span className="w-2.5 h-2.5 rounded-full bg-orange-500 inline-block" />
           Incidente
         </span>
-        <span className="flex items-center gap-1 text-sky-400">
-          <span className="w-2.5 h-2.5 rounded-full bg-sky-500 inline-block" />
-          Refletido
-        </span>
         <span className="flex items-center gap-1 text-purple-400">
           <span className="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block" />
           Difratado
-        </span>
-        <span className="flex items-center gap-1 text-red-400">
-          <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
-          Transmitido
         </span>
         <span className="flex items-center gap-1 text-emerald-400">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />

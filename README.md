@@ -42,8 +42,7 @@ npm run build
    - Pega para ajustar altura e posição do microfone recetor na habitação.
 
 2. **Propagação Sonora e Ondas Animadas**:
-   - **Laranja**: Ondas incidentes diretas (vivas no ar livre e atenuadas dinamicamente após a barreira conforme o isolamento sonoro do material e da espessura).
-   - **Azul**: Ondas refletidas na face frontal (atenuadas por $1 - \alpha$).
+   - **Laranja**: Ondas incidentes diretas (vivas no ar livre e atenuadas dinamicamente após a barreira conforme o isolamento do material e da espessura).
    - **Roxo**: Difração sobre o topo da barreira (raios de Fresnel $d_1$ e $d_2$ e ondas de Huygens).
    - **Verde**: Sombra acústica geométrica.
    - **Mapa de Níveis Sonoros (Heatmap)** em tempo real com gradiente contínuo de decibéis.
