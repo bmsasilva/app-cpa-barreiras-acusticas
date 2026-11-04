@@ -157,47 +157,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               </div>
             </div>
 
-            <div className="space-y-1.5 bg-slate-950/50 p-3 rounded-xl border border-slate-800">
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-medium text-slate-200">Altura da Barreira</span>
-                <span className="font-bold text-sky-400 font-mono text-sm">{barrier.height.toFixed(2)} m</span>
-              </div>
-              <input
-                type="range"
-                min="0.5"
-                max="6.0"
-                step="0.05"
-                value={barrier.height}
-                onChange={(e) => onUpdateBarrier({ height: parseFloat(e.target.value), enabled: true })}
-                className="w-full accent-sky-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
-              />
-              <div className="flex justify-between text-[10px] text-slate-500">
-                <span>0.5 m (baixa)</span>
-                <span>3.0 m</span>
-                <span>6.0 m (máx)</span>
-              </div>
-            </div>
-
-            <div className="space-y-1.5 bg-slate-950/50 p-3 rounded-xl border border-slate-800">
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-medium text-slate-200">Posição Horizontal (X)</span>
-                <span className="font-bold text-sky-400 font-mono text-sm">{barrier.x.toFixed(1)} m</span>
-              </div>
-              <input
-                type="range"
-                min={source.x + 1.5}
-                max={receiver.x - 1.5}
-                step="0.2"
-                value={barrier.x}
-                onChange={(e) => onUpdateBarrier({ x: parseFloat(e.target.value), enabled: true })}
-                className="w-full accent-sky-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
-              />
-              <div className="flex justify-between text-[10px] text-slate-500">
-                <span>Perto da fonte ({(source.x + 1.5).toFixed(1)}m)</span>
-                <span>Perto do recetor ({(receiver.x - 1.5).toFixed(1)}m)</span>
-              </div>
-            </div>
-
             <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-800 space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <div>
@@ -229,22 +188,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               <div className="text-[10px] text-sky-400/80 bg-sky-950/30 px-2 py-1 rounded border border-sky-900/40">
                 💡 A espessura aumenta o isolamento por transmissão (Lei da Massa) e cria duplo bordo difrativo no topo largo (+{result.thicknessDiffractionBonusDb} dB).
               </div>
-            </div>
-
-            <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800 space-y-1">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-[11px] text-slate-400">Comprimento Fictício</span>
-                <span className="font-mono text-xs font-bold text-white">{barrier.lengthM} m</span>
-              </div>
-              <input
-                type="range"
-                min="10"
-                max="50"
-                step="5"
-                value={barrier.lengthM}
-                onChange={(e) => onUpdateBarrier({ lengthM: parseInt(e.target.value) })}
-                className="w-full accent-slate-400 h-1 bg-slate-800 rounded cursor-pointer"
-              />
             </div>
 
             <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
