@@ -394,22 +394,50 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           </g>
         )}
 
-        {/* FRENTES DE ONDA ANIMADAS */}
-        {toggles.showIncidentWaves &&
-          incidentRays.map((wave, idx) => (
-            <circle
-              key={`inc-${idx}`}
-              cx={srcPx.x}
-              cy={srcPx.y}
-              r={wave.radiusPx}
-              fill="none"
-              stroke="#f97316"
-              strokeWidth={2}
-              strokeOpacity={wave.opacity * 0.75}
-              clipPath={barrier.enabled ? 'url(#incidentClip)' : undefined}
-              className="pointer-events-none"
-            />
-          ))}
+        {/* FRENTES DE ONDA ANIMADAS (CAMPO DIRETO E TRANSMITIDO ATENUADO) */}
+        {toggles.showIncidentWaves && (
+          <g className="pointer-events-none">
+            {/* 1A. Zona Iluminada (antes da barreira e no ar livre acima) */}
+            {incidentRays.map((wave, idx) => (
+              <circle
+                key={`inc-${idx}`}
+                cx={srcPx.x}
+                cy={srcPx.y}
+                r={wave.radiusPx}
+                fill="none"
+                stroke="#f97316"
+                strokeWidth={2}
+                strokeOpacity={wave.opacity * 0.8}
+                clipPath={barrier.enabled ? 'url(#incidentClip)' : undefined}
+              />
+            ))}
+
+            {/* 1B. Continuação da Onda Laranja na Zona de Sombra (Atenuada pela Massa do Material) */}
+            {barrier.enabled && result.isLineOfSightBroken &&
+              incidentRays.map((wave, idx) => {
+                const distToBar = barTopPx.x - srcPx.x;
+                if (wave.radiusPx <= distToBar) return null;
+                // Atenuação direta pela Lei da Massa e isolamento do material R
+                const transmissionFactor = Math.pow(10, -result.materialTransmissionLoss / 30);
+                const attenuatedOpacity = Math.min(0.65, Math.max(0.04, transmissionFactor * wave.opacity * 1.5));
+                const attenuatedWidth = Math.max(1, 2 * transmissionFactor);
+
+                return (
+                  <circle
+                    key={`inc-attenuated-${idx}`}
+                    cx={srcPx.x}
+                    cy={srcPx.y}
+                    r={wave.radiusPx}
+                    fill="none"
+                    stroke="#f97316"
+                    strokeWidth={attenuatedWidth}
+                    strokeOpacity={attenuatedOpacity}
+                    clipPath="url(#shadowClip)"
+                  />
+                );
+              })}
+          </g>
+        )}
 
         <clipPath id="incidentClip">
           {barrier.enabled ? (
@@ -441,6 +469,17 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           ) : (
             <rect x="0" y="0" width={dimensions.width} height={dimensions.height} />
           )}
+        </clipPath>
+
+        <clipPath id="shadowClip">
+          <polygon
+            points={`
+              ${barTopPx.x},${barTopPx.y}
+              ${shadowEndPx.x},${shadowEndPx.y}
+              ${dimensions.width},${groundYPx}
+              ${barTopPx.x},${groundYPx}
+            `}
+          />
         </clipPath>
 
         {/* 2. Ondas Refletidas */}
@@ -510,37 +549,6 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
         )}
 
         <clipPath id="diffractionClip">
-          <rect x={barTopPx.x} y="0" width={dimensions.width - barTopPx.x} height={dimensions.height} />
-        </clipPath>
-
-        {/* 4. Transmissão */}
-        {toggles.showTransmittedWaves && barrier.enabled && (
-          <g className="pointer-events-none">
-            {incidentRays.map((wave, idx) => {
-              const distToBar = barTopPx.x - srcPx.x;
-              if (wave.radiusPx <= distToBar) return null;
-              const transmissionFactor = Math.pow(10, -result.materialTransmissionLoss / 25);
-              const op = Math.min(0.85, Math.max(0.04, transmissionFactor * wave.opacity * 2.5));
-
-              return (
-                <circle
-                  key={`trans-${idx}`}
-                  cx={srcPx.x}
-                  cy={srcPx.y}
-                  r={wave.radiusPx}
-                  fill="none"
-                  stroke="#ef4444"
-                  strokeWidth="1.5"
-                  strokeDasharray="2 3"
-                  strokeOpacity={op}
-                  clipPath="url(#transmissionClip)"
-                />
-              );
-            })}
-          </g>
-        )}
-
-        <clipPath id="transmissionClip">
           <rect x={barTopPx.x} y="0" width={dimensions.width - barTopPx.x} height={dimensions.height} />
         </clipPath>
 
