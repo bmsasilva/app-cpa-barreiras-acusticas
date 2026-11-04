@@ -397,89 +397,67 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
         {/* FRENTES DE ONDA ANIMADAS (CAMPO DIRETO E TRANSMITIDO ATENUADO) */}
         {toggles.showIncidentWaves && (
           <g className="pointer-events-none">
-            {/* 1A. Zona Iluminada (antes da barreira e no ar livre acima) */}
-            {incidentRays.map((wave, idx) => (
-              <circle
-                key={`inc-${idx}`}
-                cx={srcPx.x}
-                cy={srcPx.y}
-                r={wave.radiusPx}
-                fill="none"
-                stroke="#f97316"
-                strokeWidth={2}
-                strokeOpacity={wave.opacity * 0.8}
-                clipPath={barrier.enabled ? 'url(#incidentClip)' : undefined}
-              />
-            ))}
+            {incidentRays.map((wave, idx) => {
+              const distToBar = barTopPx.x - srcPx.x;
+              const hasReachedBarrier = barrier.enabled && wave.radiusPx > distToBar;
 
-            {/* 1B. Continuação da Onda Laranja na Zona de Sombra (Atenuada pela Massa do Material) */}
-            {barrier.enabled && result.isLineOfSightBroken &&
-              incidentRays.map((wave, idx) => {
-                const distToBar = barTopPx.x - srcPx.x;
-                if (wave.radiusPx <= distToBar) return null;
-                // Atenuação direta pela Lei da Massa e isolamento do material R
-                const transmissionFactor = Math.pow(10, -result.materialTransmissionLoss / 30);
-                const attenuatedOpacity = Math.min(0.65, Math.max(0.04, transmissionFactor * wave.opacity * 1.5));
-                const attenuatedWidth = Math.max(1, 2 * transmissionFactor);
-
+              if (!barrier.enabled || !hasReachedBarrier) {
                 return (
                   <circle
-                    key={`inc-attenuated-${idx}`}
+                    key={`inc-full-${idx}`}
                     cx={srcPx.x}
                     cy={srcPx.y}
                     r={wave.radiusPx}
                     fill="none"
                     stroke="#f97316"
-                    strokeWidth={attenuatedWidth}
-                    strokeOpacity={attenuatedOpacity}
-                    clipPath="url(#shadowClip)"
+                    strokeWidth={2.2}
+                    strokeOpacity={wave.opacity * 0.85}
                   />
                 );
-              })}
+              }
+
+              // Quando a barreira está ativa e a onda ultrapassa a barreira:
+              // 1. Antes da barreira: laranja vivo e nítido
+              // 2. Depois da barreira: a onda laranja CONTINUA com atenuação pelo isolamento do material (20% a 55% de opacidade)
+              const transmissionFactor = Math.pow(10, -result.materialTransmissionLoss / 35);
+              const postBarrierOpacity = Math.max(0.20, Math.min(0.55, transmissionFactor * wave.opacity * 1.8));
+
+              return (
+                <React.Fragment key={`inc-split-${idx}`}>
+                  {/* Antes da barreira */}
+                  <circle
+                    cx={srcPx.x}
+                    cy={srcPx.y}
+                    r={wave.radiusPx}
+                    fill="none"
+                    stroke="#f97316"
+                    strokeWidth={2.2}
+                    strokeOpacity={wave.opacity * 0.85}
+                    clipPath="url(#beforeBarrierClip)"
+                  />
+                  {/* Depois da barreira: continua em laranja atenuado */}
+                  <circle
+                    cx={srcPx.x}
+                    cy={srcPx.y}
+                    r={wave.radiusPx}
+                    fill="none"
+                    stroke="#f97316"
+                    strokeWidth={1.8}
+                    strokeOpacity={postBarrierOpacity}
+                    clipPath="url(#afterBarrierClip)"
+                  />
+                </React.Fragment>
+              );
+            })}
           </g>
         )}
 
-        <clipPath id="incidentClip">
-          {barrier.enabled ? (
-            result.isLineOfSightBroken ? (
-              <polygon
-                points={`
-                  0,0
-                  ${dimensions.width},0
-                  ${dimensions.width},${shadowEndPx.y}
-                  ${barTopPx.x},${barTopPx.y}
-                  ${barTopPx.x},${groundYPx}
-                  0,${groundYPx}
-                `}
-              />
-            ) : (
-              <polygon
-                points={`
-                  0,0
-                  ${dimensions.width},0
-                  ${dimensions.width},${groundYPx}
-                  ${barTopPx.x + barThicknessPx / 2},${groundYPx}
-                  ${barTopPx.x + barThicknessPx / 2},${barTopPx.y}
-                  ${barTopPx.x - barThicknessPx / 2},${barTopPx.y}
-                  ${barTopPx.x - barThicknessPx / 2},${groundYPx}
-                  0,${groundYPx}
-                `}
-              />
-            )
-          ) : (
-            <rect x="0" y="0" width={dimensions.width} height={dimensions.height} />
-          )}
+        <clipPath id="beforeBarrierClip">
+          <rect x="0" y="0" width={barTopPx.x} height={dimensions.height} />
         </clipPath>
 
-        <clipPath id="shadowClip">
-          <polygon
-            points={`
-              ${barTopPx.x},${barTopPx.y}
-              ${shadowEndPx.x},${shadowEndPx.y}
-              ${dimensions.width},${groundYPx}
-              ${barTopPx.x},${groundYPx}
-            `}
-          />
+        <clipPath id="afterBarrierClip">
+          <rect x={barTopPx.x} y="0" width={dimensions.width - barTopPx.x} height={dimensions.height} />
         </clipPath>
 
         {/* 2. Ondas Refletidas */}
@@ -552,28 +530,18 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           <rect x={barTopPx.x} y="0" width={dimensions.width - barTopPx.x} height={dimensions.height} />
         </clipPath>
 
-        {/* LINHA DE VISÃO DIRETA (LOS) */}
-        {toggles.showLineOfSight && (
+        {/* LINHA DE VISÃO DIRETA (LOS) - Apenas exibida em verde quando desimpedida */}
+        {toggles.showLineOfSight && !result.isLineOfSightBroken && (
           <g className="pointer-events-none">
             <line
               x1={srcPx.x}
               y1={srcPx.y}
               x2={recPx.x}
               y2={recPx.y}
-              stroke={result.isLineOfSightBroken ? '#ef4444' : '#10b981'}
+              stroke="#10b981"
               strokeWidth="2"
               strokeDasharray="6 4"
             />
-            {barrier.enabled && (
-              <circle
-                cx={barTopPx.x}
-                cy={toPxY(result.lineOfSightYAtBarrier)}
-                r="4.5"
-                fill={result.isLineOfSightBroken ? '#ef4444' : '#10b981'}
-                stroke="#fff"
-                strokeWidth="1.5"
-              />
-            )}
           </g>
         )}
 
