@@ -50,8 +50,8 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* CARTÕES DE MÉTRICAS PRINCIPAIS (8 Cards Exigidos) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
+      {/* CARTÕES DE MÉTRICAS PRINCIPAIS (6 Cards) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
         <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-md">
           <div className="text-[11px] text-slate-400 font-medium">Sem Barreira</div>
           <div className="font-mono text-xl font-bold text-slate-100 mt-1">
@@ -80,23 +80,6 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
           <div className="text-[10px] text-sky-500/80 mt-0.5">
             {result.netReductionA > 0 ? `-${result.netReductionA.toFixed(1)}` : '0.0'} dB(A)
           </div>
-        </div>
-
-        <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-md">
-          <div className="text-[11px] text-purple-400 font-medium">Dif. Percurso (δ)</div>
-          <div className="font-mono text-xl font-bold text-purple-300 mt-1">
-            {result.pathDifference > 0 ? `+${result.pathDifference.toFixed(3)}` : result.pathDifference.toFixed(3)}{' '}
-            <span className="text-xs text-purple-500 font-sans">m</span>
-          </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">(d1 + esp. + d2) - d0</div>
-        </div>
-
-        <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-md">
-          <div className="text-[11px] text-purple-400 font-medium">Fresnel (N)</div>
-          <div className="font-mono text-xl font-bold text-purple-300 mt-1">
-            {result.fresnelNumber.toFixed(2)}
-          </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">2δ / λ (λ={result.wavelength}m)</div>
         </div>
 
         <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-md">
