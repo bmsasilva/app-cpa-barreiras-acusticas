@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type {
   AcousticCalculationResult,
   SimulationBarrier,
@@ -10,8 +10,6 @@ import {
   BarChart,
   CartesianGrid,
   Legend,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -35,8 +33,6 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
   receiver: _receiver,
   result,
 }) => {
-  const [activeChartTab, setActiveChartTab] = useState<'levels' | 'attenuation'>('levels');
-
   const levelsChartData = [
     ...result.spectrum.map((s) => ({
       freq: `${s.frequency} Hz`,
@@ -51,13 +47,6 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
       'Atenuação (ΔL)': result.netReductionA,
     },
   ];
-
-  const attenuationChartData = result.spectrum.map((s) => ({
-    freq: `${s.frequency} Hz`,
-    'Difração Topo (ΔLdif)': s.diffractionLoss,
-    'Isolamento Material (R)': s.transmissionLoss,
-    'Atenuação Efetiva (ΔL)': s.reduction,
-  }));
 
   return (
     <div className="space-y-4">
@@ -142,115 +131,41 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
         </div>
       </div>
 
-      {/* GRÁFICOS ACÚSTICOS INTERATIVOS */}
+      {/* GRÁFICO ACÚSTICO DE NÍVEIS SONOROS */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-sky-400" />
-            <h3 className="font-bold text-white text-sm">Análise Espectral e Comportamento Acústico</h3>
-          </div>
-
-          <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-medium">
-            <button
-              onClick={() => setActiveChartTab('levels')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                activeChartTab === 'levels'
-                  ? 'bg-sky-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Comparação Antes vs. Depois
-            </button>
-            <button
-              onClick={() => setActiveChartTab('attenuation')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                activeChartTab === 'attenuation'
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Atenuação vs. Frequência (Difração & Material)
-            </button>
+            <h3 className="font-bold text-white text-sm">Níveis Sonoros por Banda de Frequência (Antes vs. Depois da Barreira)</h3>
           </div>
         </div>
 
-        {activeChartTab === 'levels' && (
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={levelsChartData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                <XAxis dataKey="freq" stroke="#64748b" tick={{ fill: '#94a3b8', fontSize: 11 }} />
-                <YAxis
-                  stroke="#64748b"
-                  domain={[20, 100]}
-                  tick={{ fill: '#94a3b8', fontSize: 11 }}
-                  unit=" dB"
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#0f172a',
-                    borderColor: '#334155',
-                    borderRadius: '0.75rem',
-                    color: '#f8fafc',
-                    fontSize: '12px',
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                <Bar dataKey="Sem Barreira" fill="#94a3b8" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Com Barreira" fill="#10b981" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-
-        {activeChartTab === 'attenuation' && (
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={attenuationChartData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="freq" stroke="#64748b" tick={{ fill: '#94a3b8', fontSize: 11 }} />
-                <YAxis
-                  stroke="#64748b"
-                  domain={[0, 50]}
-                  tick={{ fill: '#94a3b8', fontSize: 11 }}
-                  unit=" dB"
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#0f172a',
-                    borderColor: '#334155',
-                    borderRadius: '0.75rem',
-                    color: '#f8fafc',
-                    fontSize: '12px',
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                <Line
-                  type="monotone"
-                  dataKey="Difração Topo (ΔLdif)"
-                  stroke="#a855f7"
-                  strokeWidth={2.5}
-                  dot={{ r: 4, fill: '#a855f7' }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="Isolamento Material (R)"
-                  stroke="#f43f5e"
-                  strokeWidth={2}
-                  strokeDasharray="4 4"
-                  dot={{ r: 3, fill: '#f43f5e' }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="Atenuação Efetiva (ΔL)"
-                  stroke="#38bdf8"
-                  strokeWidth={3}
-                  dot={{ r: 5, fill: '#38bdf8' }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+        <div className="h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={levelsChartData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+              <XAxis dataKey="freq" stroke="#64748b" tick={{ fill: '#94a3b8', fontSize: 11 }} />
+              <YAxis
+                stroke="#64748b"
+                domain={[20, 100]}
+                tick={{ fill: '#94a3b8', fontSize: 11 }}
+                unit=" dB"
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#0f172a',
+                  borderColor: '#334155',
+                  borderRadius: '0.75rem',
+                  color: '#f8fafc',
+                  fontSize: '12px',
+                }}
+              />
+              <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+              <Bar dataKey="Sem Barreira" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Com Barreira" fill="#10b981" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );
