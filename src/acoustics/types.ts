@@ -92,6 +92,11 @@ export interface AcousticCalculationResult {
   totalAreaM2: number;
   totalCostEuro: number;
 
+  // Propriedades estruturais e de espessura
+  effectiveThicknessM: number; // Espessura real da barreira (m)
+  surfaceMassKgM2: number; // Massa superficial efetiva m'' = ρ * t (kg/m²)
+  thicknessDiffractionBonusDb: number; // Atenuação adicional de barreira espessa no topo (dB)
+
   // Reflexão na face anterior
   reflectionCoefficient: number; // 1 - α
   reflectedLevelEstimate: number; // Estimativa qualitativa de nível refletido a 1m da barreira

@@ -157,7 +157,11 @@ export function App() {
       16,
       68
     );
-    doc.text(`- Material Selecionado: ${barrier.materialId.toUpperCase()} (Espessura = ${(barrier.thickness * 100).toFixed(0)} cm)`, 16, 74);
+    doc.text(
+      `- Material Selecionado: ${barrier.materialId.toUpperCase()} (Espessura = ${(barrier.thickness * 100).toFixed(1)} cm, Massa sup. = ${result.surfaceMassKgM2} kg/m²)`,
+      16,
+      74
+    );
 
     doc.setFontSize(13);
     doc.text('2. Resultados Acústicos Estimados', 14, 88);
@@ -167,8 +171,8 @@ export function App() {
     doc.text(`- Nível Sonoro Com Barreira: ${result.levelWithBarrier} dB (${result.levelWithBarrierA} dB(A))`, 16, 102);
     doc.text(`- Redução Sonora Líquida (ΔL): -${result.netReduction.toFixed(1)} dB`, 16, 108);
     doc.text(`- Diferença de Percurso (δ): ${result.pathDifference} m (Número de Fresnel N = ${result.fresnelNumber})`, 16, 114);
-    doc.text(`- Perda por Difração no Topo (ΔLdif): ${result.diffractionAttenuation} dB`, 16, 120);
-    doc.text(`- Perda por Transmissão do Material (R): ${result.materialTransmissionLoss} dB`, 16, 126);
+    doc.text(`- Perda por Difração no Topo (ΔLdif): ${result.diffractionAttenuation} dB (Bónus espessura: +${result.thicknessDiffractionBonusDb} dB)`, 16, 120);
+    doc.text(`- Perda por Transmissão Efetiva (R): ${result.materialTransmissionLoss} dB (Lei da Massa)`, 16, 126);
     doc.text(`- Custo Fictício Estimado: ${result.totalCostEuro} € (Área: ${result.totalAreaM2} m²)`, 16, 132);
 
     doc.setFontSize(9);

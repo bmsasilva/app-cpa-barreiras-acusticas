@@ -99,7 +99,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
             {result.pathDifference > 0 ? `+${result.pathDifference.toFixed(3)}` : result.pathDifference.toFixed(3)}{' '}
             <span className="text-xs text-purple-500 font-sans">m</span>
           </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">(d1 + d2) - d0</div>
+          <div className="text-[10px] text-slate-500 mt-0.5">(d1 + esp. + d2) - d0</div>
         </div>
 
         <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-md">
@@ -116,7 +116,9 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
             {result.diffractionAttenuation.toFixed(1)}{' '}
             <span className="text-xs text-indigo-500 font-sans">dB</span>
           </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">Maekawa / Kurze</div>
+          <div className="text-[10px] text-slate-500 mt-0.5">
+            {result.thicknessDiffractionBonusDb > 0 ? `+${result.thicknessDiffractionBonusDb} dB topo largo` : 'Maekawa / Kurze'}
+          </div>
         </div>
 
         <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-md">
@@ -125,7 +127,9 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
             {result.materialTransmissionLoss}{' '}
             <span className="text-xs text-rose-500 font-sans">dB</span>
           </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">Transmissão direta</div>
+          <div className="text-[10px] text-slate-500 mt-0.5">
+            {result.surfaceMassKgM2 ? `${result.surfaceMassKgM2} kg/m²` : 'Transmissão direta'}
+          </div>
         </div>
 
         <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-md">

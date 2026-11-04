@@ -131,7 +131,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   return (
                     <button
                       key={mId}
-                      onClick={() => onUpdateBarrier({ materialId: mId, enabled: true })}
+                      onClick={() => onUpdateBarrier({ materialId: mId, enabled: true, thickness: mat.defaultThicknessM })}
                       className={`w-full text-left p-2.5 rounded-xl border transition-all flex items-center justify-between ${
                         isSelected
                           ? 'border-sky-500 bg-sky-950/40 text-white shadow-sm ring-1 ring-sky-500/50'
@@ -198,36 +198,53 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800 space-y-1">
-                <div className="text-[11px] text-slate-400">Espessura (e)</div>
-                <div className="font-mono text-xs font-bold text-white">
-                  {(barrier.thickness * 100).toFixed(0)} cm
+            <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-800 space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <div>
+                  <span className="font-semibold text-slate-200 block">Espessura da Barreira (e)</span>
+                  <span className="text-[10px] text-slate-400">
+                    Massa: {result.surfaceMassKgM2} kg/m² · R({source.frequency}Hz) = {result.materialTransmissionLoss} dB
+                  </span>
                 </div>
-                <input
-                  type="range"
-                  min="0.02"
-                  max="0.40"
-                  step="0.01"
-                  value={barrier.thickness}
-                  onChange={(e) => onUpdateBarrier({ thickness: parseFloat(e.target.value) })}
-                  className="w-full accent-slate-400 h-1 bg-slate-800 rounded cursor-pointer"
-                />
+                <span className="font-bold text-sky-400 font-mono text-sm">
+                  {barrier.thickness < 0.01
+                    ? `${(barrier.thickness * 1000).toFixed(0)} mm`
+                    : `${(barrier.thickness * 100).toFixed(1)} cm`}
+                </span>
               </div>
+              <input
+                type="range"
+                min="0.002"
+                max="0.50"
+                step="0.002"
+                value={barrier.thickness}
+                onChange={(e) => onUpdateBarrier({ thickness: parseFloat(e.target.value) })}
+                className="w-full accent-sky-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-slate-500">
+                <span>2 mm (fina)</span>
+                <span>15 cm</span>
+                <span>50 cm (larga)</span>
+              </div>
+              <div className="text-[10px] text-sky-400/80 bg-sky-950/30 px-2 py-1 rounded border border-sky-900/40">
+                💡 A espessura aumenta o isolamento por transmissão (Lei da Massa) e cria duplo bordo difrativo no topo largo (+{result.thicknessDiffractionBonusDb} dB).
+              </div>
+            </div>
 
-              <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800 space-y-1">
-                <div className="text-[11px] text-slate-400">Comprimento Fictício</div>
-                <div className="font-mono text-xs font-bold text-white">{barrier.lengthM} m</div>
-                <input
-                  type="range"
-                  min="10"
-                  max="50"
-                  step="5"
-                  value={barrier.lengthM}
-                  onChange={(e) => onUpdateBarrier({ lengthM: parseInt(e.target.value) })}
-                  className="w-full accent-slate-400 h-1 bg-slate-800 rounded cursor-pointer"
-                />
+            <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800 space-y-1">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-[11px] text-slate-400">Comprimento Fictício</span>
+                <span className="font-mono text-xs font-bold text-white">{barrier.lengthM} m</span>
               </div>
+              <input
+                type="range"
+                min="10"
+                max="50"
+                step="5"
+                value={barrier.lengthM}
+                onChange={(e) => onUpdateBarrier({ lengthM: parseInt(e.target.value) })}
+                className="w-full accent-slate-400 h-1 bg-slate-800 rounded cursor-pointer"
+              />
             </div>
 
             <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between">

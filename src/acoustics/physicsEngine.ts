@@ -56,21 +56,47 @@ export function checkLineOfSight(
 }
 
 /**
- * Calcula o número de Fresnel N e a atenuação por difração (Kurze-Anderson / Maekawa).
+ * Calcula a perda de transmissão efetiva R(f) ajustada pela espessura real através da Lei da Massa:
+ * ΔR = 20 * log10(m'' / m0'') = 20 * log10(t / t0)
+ */
+export function calculateEffectiveTransmissionLoss(
+  nominalLoss: number,
+  actualThicknessM: number,
+  defaultThicknessM: number
+): number {
+  if (defaultThicknessM <= 0 || actualThicknessM <= 0) return nominalLoss;
+  const ratio = actualThicknessM / defaultThicknessM;
+  const deltaR = 20 * Math.log10(ratio);
+  return Math.min(85, Math.max(5, nominalLoss + deltaR));
+}
+
+/**
+ * Calcula o número de Fresnel N e a atenuação por difração (Kurze-Anderson / Maekawa com modelo de barreira espessa de Pierce/Kurze).
  */
 export function calculateDiffraction(
   pathDifference: number,
   frequency: number,
-  isLineOfSightBroken: boolean
-): { fresnelNumber: number; diffractionLossDb: number; wavelength: number } {
+  isLineOfSightBroken: boolean,
+  thicknessM: number = 0
+): { fresnelNumber: number; diffractionLossDb: number; wavelength: number; thicknessBonusDb: number } {
   const wavelength = SPEED_OF_SOUND / frequency;
   const N = (2 * pathDifference) / wavelength;
 
   let diffractionLoss = 0;
+  let thicknessBonus = 0;
+
+  // Efeito adicional de barreira espessa / topo largo (Pierce / Kurze)
+  if (thicknessM > 0.005 && isLineOfSightBroken) {
+    const k = (2 * Math.PI) / wavelength;
+    // Atenuação adicional suave de topo largo: ΔL_thick = 10 * log10(1 + k * w / 2) * 0.5
+    thicknessBonus = Math.min(6.0, Math.max(0, 10 * Math.log10(1 + (k * thicknessM) / 2) * 0.5));
+  }
+
+  const maxDiffractionLimit = thicknessM > 0.005 ? 25 : 22;
 
   if (isLineOfSightBroken && N >= 0) {
     const rawLoss = 10 * Math.log10(3 + 20 * N);
-    diffractionLoss = Math.min(22, Math.max(0, rawLoss));
+    diffractionLoss = Math.min(maxDiffractionLimit, Math.max(0, rawLoss + thicknessBonus));
   } else if (!isLineOfSightBroken) {
     if (N >= -0.15) {
       const val = 3 + 20 * N;
@@ -88,6 +114,7 @@ export function calculateDiffraction(
     fresnelNumber: N,
     diffractionLossDb: diffractionLoss,
     wavelength,
+    thicknessBonusDb: thicknessBonus,
   };
 }
 
@@ -109,6 +136,7 @@ export function calculateAcoustics(
   receiver: SimulationReceiver
 ): AcousticCalculationResult {
   const material = MATERIALS[barrier.materialId] || MATERIALS.betao;
+  const thicknessM = Math.max(0.001, barrier.thickness ?? material.defaultThicknessM);
 
   const dx = receiver.x - source.x;
   const dy = receiver.height - source.height;
@@ -123,17 +151,24 @@ export function calculateAcoustics(
   const barrierIsActive = barrier.enabled && barrier.height > 0.05 && barrier.x > source.x && barrier.x < receiver.x;
 
   if (barrierIsActive) {
-    d1 = Math.hypot(barrier.x - source.x, barrier.height - source.height);
-    d2 = Math.hypot(receiver.x - barrier.x, receiver.height - barrier.height);
+    // Modelagem de barreira espessa: contorno do bordo superior frontal ao bordo superior traseiro
+    const halfW = thicknessM / 2;
+    const xEdge1 = Math.max(source.x + 0.02, barrier.x - halfW);
+    const xEdge2 = Math.min(receiver.x - 0.02, barrier.x + halfW);
+    const topW = Math.max(0, xEdge2 - xEdge1);
+
+    d1 = Math.hypot(xEdge1 - source.x, barrier.height - source.height);
+    d2 = Math.hypot(receiver.x - xEdge2, receiver.height - barrier.height);
 
     const losInfo = checkLineOfSight(source, receiver, barrier.x, barrier.height);
     isBroken = losInfo.isBroken;
     lineOfSightY = losInfo.lineOfSightY;
 
+    // Percurso acústico total sobre o contorno superior: d1 + topW + d2
     if (isBroken) {
-      pathDifference = Math.max(0, (d1 + d2) - d0);
+      pathDifference = Math.max(0, (d1 + topW + d2) - d0);
     } else {
-      pathDifference = -Math.abs((d1 + d2) - d0);
+      pathDifference = -Math.abs((d1 + topW + d2) - d0);
     }
   } else {
     d1 = d0 / 2;
@@ -144,13 +179,23 @@ export function calculateAcoustics(
   }
 
   const selectedFreq = source.frequency;
-  const diffractionData = calculateDiffraction(pathDifference, selectedFreq, isBroken && barrierIsActive);
+  const diffractionData = calculateDiffraction(
+    pathDifference,
+    selectedFreq,
+    isBroken && barrierIsActive,
+    barrierIsActive ? thicknessM : 0
+  );
 
   const spectralOffset = SPECTRUM_OFFSETS[source.spectrumType][selectedFreq] || 0;
   const effectiveSourceLevel = source.soundPowerLevel + spectralOffset;
 
   const levelFreeField = calculateFreeFieldLevel(effectiveSourceLevel, d0);
-  const materialTransmissionLoss = material.transmissionLoss[selectedFreq] || 25;
+  const nominalTransmissionLoss = material.transmissionLoss[selectedFreq] || 25;
+  const materialTransmissionLoss = calculateEffectiveTransmissionLoss(
+    nominalTransmissionLoss,
+    thicknessM,
+    material.defaultThicknessM
+  );
 
   let levelDiffracted = levelFreeField;
   let levelTransmitted = -999;
@@ -172,8 +217,18 @@ export function calculateAcoustics(
     const sLevel = source.soundPowerLevel + sOffset;
     const freeFieldAtF = calculateFreeFieldLevel(sLevel, d0);
 
-    const diffAtF = calculateDiffraction(pathDifference, f, isBroken && barrierIsActive);
-    const transLossAtF = material.transmissionLoss[f] || 25;
+    const diffAtF = calculateDiffraction(
+      pathDifference,
+      f,
+      isBroken && barrierIsActive,
+      barrierIsActive ? thicknessM : 0
+    );
+    const nominalTransAtF = material.transmissionLoss[f] || 25;
+    const transLossAtF = calculateEffectiveTransmissionLoss(
+      nominalTransAtF,
+      thicknessM,
+      material.defaultThicknessM
+    );
 
     let withBarrierAtF = freeFieldAtF;
     if (barrierIsActive) {
@@ -188,7 +243,7 @@ export function calculateAcoustics(
       withBarrier: Number(withBarrierAtF.toFixed(1)),
       reduction: Number((freeFieldAtF - withBarrierAtF).toFixed(1)),
       diffractionLoss: Number(diffAtF.diffractionLossDb.toFixed(1)),
-      transmissionLoss: transLossAtF,
+      transmissionLoss: Number(transLossAtF.toFixed(1)),
     };
   });
 
@@ -207,7 +262,9 @@ export function calculateAcoustics(
 
   const barrierLength = barrier.lengthM || 20;
   const totalAreaM2 = barrierIsActive ? barrier.height * barrierLength : 0;
-  const totalCostEuro = totalAreaM2 * material.costPerM2;
+  const thicknessRatio = thicknessM / Math.max(0.001, material.defaultThicknessM);
+  const totalCostEuro = totalAreaM2 * material.costPerM2 * Math.max(0.2, thicknessRatio);
+  const surfaceMassKgM2 = material.densityKgM3 * thicknessM;
 
   const reflectionCoeff = Math.max(0, 1 - (material.alphaW || 0.05));
   const distSourceToBarrier = Math.hypot(barrier.x - source.x, barrier.height / 2 - source.height);
@@ -240,6 +297,10 @@ export function calculateAcoustics(
     totalAreaM2: Number(totalAreaM2.toFixed(1)),
     totalCostEuro: Math.round(totalCostEuro),
 
+    effectiveThicknessM: Number(thicknessM.toFixed(3)),
+    surfaceMassKgM2: Number(surfaceMassKgM2.toFixed(1)),
+    thicknessDiffractionBonusDb: Number(diffractionData.thicknessBonusDb.toFixed(1)),
+
     reflectionCoefficient: Number(reflectionCoeff.toFixed(2)),
     reflectedLevelEstimate: Number(reflectedLevelEstimate.toFixed(1)),
   };
@@ -262,25 +323,34 @@ export function calculatePointSoundLevel(
     return lFree;
   }
 
-  if (px <= barrier.x) {
+  const mat = MATERIALS[barrier.materialId] || MATERIALS.betao;
+  const thicknessM = Math.max(0.001, barrier.thickness ?? mat.defaultThicknessM);
+
+  if (px <= barrier.x - thicknessM / 2) {
     if (mode === 'difference') return 0;
     return lFree;
   }
 
   const los = checkLineOfSight(source, { x: px, height: py }, barrier.x, barrier.height);
-  const d1 = Math.hypot(barrier.x - source.x, barrier.height - source.height);
-  const d2 = Math.hypot(px - barrier.x, py - barrier.height);
+
+  const halfW = thicknessM / 2;
+  const xEdge1 = Math.max(source.x + 0.02, barrier.x - halfW);
+  const xEdge2 = Math.min(px - 0.02, barrier.x + halfW);
+  const topW = Math.max(0, xEdge2 - xEdge1);
+
+  const d1 = Math.hypot(xEdge1 - source.x, barrier.height - source.height);
+  const d2 = Math.hypot(px - xEdge2, py - barrier.height);
 
   let pathDiff = 0;
   if (los.isBroken) {
-    pathDiff = Math.max(0, (d1 + d2) - distDirect);
+    pathDiff = Math.max(0, (d1 + topW + d2) - distDirect);
   } else {
-    pathDiff = -Math.abs((d1 + d2) - distDirect);
+    pathDiff = -Math.abs((d1 + topW + d2) - distDirect);
   }
 
-  const diffData = calculateDiffraction(pathDiff, source.frequency, los.isBroken);
-  const mat = MATERIALS[barrier.materialId] || MATERIALS.betao;
-  const rMat = mat.transmissionLoss[source.frequency] || 25;
+  const diffData = calculateDiffraction(pathDiff, source.frequency, los.isBroken, thicknessM);
+  const nominalR = mat.transmissionLoss[source.frequency] || 25;
+  const rMat = calculateEffectiveTransmissionLoss(nominalR, thicknessM, mat.defaultThicknessM);
 
   const lDif = lFree - diffData.diffractionLossDb;
   const lTrans = lFree - rMat;

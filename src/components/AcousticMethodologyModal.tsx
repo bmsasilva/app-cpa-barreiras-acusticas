@@ -58,32 +58,37 @@ export const AcousticMethodologyModal: React.FC<AcousticMethodologyModalProps> =
             Fresnel:
           </p>
           <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 font-mono text-center text-purple-300 space-y-1">
-            <div>δ = (d₁ + d₂) − d₀</div>
+            <div>δ = (d₁ + espessura + d₂) − d₀</div>
             <div>N = 2δ / λ = (2 · f · δ) / c</div>
           </div>
           <p className="leading-relaxed">
             A atenuação por difração (ΔL_dif) é determinada segundo a formulação semi-empírica reconhecida de{' '}
-            <strong>Kurze & Anderson (1971) / Maekawa (1968)</strong>, com limite físico exterior de 22 dB devido à
-            turbulência atmosférica:
+            <strong>Kurze & Anderson (1971) / Maekawa (1968)</strong> com acréscimo de barreira espessa (Pierce / Kurze)
+            decorrente da largura do topo superior (duplo bordo difrativo):
           </p>
           <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 font-mono text-center text-indigo-300">
-            ΔL_dif = 10 · log₁₀(3 + 20 · N) &nbsp; [para N ≥ 0]
+            ΔL_dif = 10 · log₁₀(3 + 20 · N) + ΔL_espessura
           </div>
         </div>
 
-        {/* 3. Combinação Energética */}
+        {/* 3. Combinação Energética e Lei da Massa */}
         <div className="space-y-1.5 text-xs">
-          <h4 className="font-bold text-emerald-400 text-sm">3. Combinação Energética (Soma Acústica)</h4>
+          <h4 className="font-bold text-emerald-400 text-sm">3. Combinação Energética e Influência da Espessura</h4>
+          <p className="leading-relaxed">
+            A espessura da barreira influencia diretamente a sua <strong>massa superficial (m'' = ρ · e)</strong>. Pela{' '}
+            <strong>Lei da Massa Acústica</strong>, o isolamento sonoro R(f) varia em 20 · log₁₀(e / e₀) dB (ganho de ~6 dB
+            ao duplicar a espessura).
+          </p>
           <p className="leading-relaxed">
             O som que atinge o recetor resulta da sobreposição incoerente da energia difratada pelo topo e da energia
-            transmitida diretamente através da massa da barreira:
+            transmitida através da massa da barreira:
           </p>
           <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 font-mono text-center text-emerald-300">
             L_com = 10 · log₁₀( 10^(L_dif / 10) + 10^(L_trans / 10) )
           </div>
           <p className="text-slate-400">
-            Onde L_dif = L_sem − ΔL_dif e L_trans = L_sem − R(f). Isto garante que barreiras acusticamente leves
-            (como chapa fina) não atenuem mais do que o seu próprio isolamento (R) permite.
+            Onde L_dif = L_sem − ΔL_dif e L_trans = L_sem − R_efetivo(f). Assim, aumentar a espessura da barreira reduz
+            simultaneamente o som transmitido e o som difratado que chega ao recetor!
           </p>
         </div>
 

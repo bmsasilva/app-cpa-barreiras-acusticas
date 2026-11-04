@@ -129,4 +129,53 @@ describe('Motor Acústico - Testes Unitários de Física', () => {
 
     expect(resConcrete.materialTransmissionLoss).toBeGreaterThan(resMetal.materialTransmissionLoss);
   });
+
+  it('deve aumentar a atenuação sonora e reduzir o volume no recetor quando a espessura da barreira aumenta', () => {
+    const source: SimulationSource = {
+      x: 0,
+      height: 1.5,
+      soundPowerLevel: 90,
+      frequency: 500,
+      spectrumType: 'pure_tone',
+    };
+
+    const receiver: SimulationReceiver = {
+      x: 30,
+      height: 1.5,
+    };
+
+    const barrierThin: SimulationBarrier = {
+      enabled: true,
+      x: 10,
+      height: 3.0,
+      thickness: 0.02, // 2 cm
+      materialId: 'madeira',
+      lengthM: 20,
+    };
+
+    const barrierThick: SimulationBarrier = {
+      enabled: true,
+      x: 10,
+      height: 3.0,
+      thickness: 0.30, // 30 cm (15x mais espessa)
+      materialId: 'madeira',
+      lengthM: 20,
+    };
+
+    const resThin = calculateAcoustics(source, barrierThin, receiver);
+    const resThick = calculateAcoustics(source, barrierThick, receiver);
+
+    // 1. O isolamento ao som transmitido R deve ser consideravelmente maior com maior espessura (Lei da Massa)
+    expect(resThick.materialTransmissionLoss).toBeGreaterThan(resThin.materialTransmissionLoss);
+
+    // 2. A massa superficial calculada deve ser proporcional à espessura
+    expect(resThick.surfaceMassKgM2).toBeGreaterThan(resThin.surfaceMassKgM2);
+
+    // 3. A perda por difração deve aumentar devido ao topo largo / contorno do topo
+    expect(resThick.diffractionAttenuation).toBeGreaterThanOrEqual(resThin.diffractionAttenuation);
+
+    // 4. O nível sonoro recebido (volume) deve ser estritamente menor com a barreira mais espessa
+    expect(resThick.levelWithBarrier).toBeLessThan(resThin.levelWithBarrier);
+    expect(resThick.netReduction).toBeGreaterThan(resThin.netReduction);
+  });
 });
