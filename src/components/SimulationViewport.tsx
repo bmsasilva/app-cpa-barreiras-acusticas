@@ -412,7 +412,35 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           ))}
 
         <clipPath id="incidentClip">
-          <rect x="0" y="0" width={barrier.enabled ? barTopPx.x : dimensions.width} height={dimensions.height} />
+          {barrier.enabled ? (
+            result.isLineOfSightBroken ? (
+              <polygon
+                points={`
+                  0,0
+                  ${dimensions.width},0
+                  ${dimensions.width},${shadowEndPx.y}
+                  ${barTopPx.x},${barTopPx.y}
+                  ${barTopPx.x},${groundYPx}
+                  0,${groundYPx}
+                `}
+              />
+            ) : (
+              <polygon
+                points={`
+                  0,0
+                  ${dimensions.width},0
+                  ${dimensions.width},${groundYPx}
+                  ${barTopPx.x + barThicknessPx / 2},${groundYPx}
+                  ${barTopPx.x + barThicknessPx / 2},${barTopPx.y}
+                  ${barTopPx.x - barThicknessPx / 2},${barTopPx.y}
+                  ${barTopPx.x - barThicknessPx / 2},${groundYPx}
+                  0,${groundYPx}
+                `}
+              />
+            )
+          ) : (
+            <rect x="0" y="0" width={dimensions.width} height={dimensions.height} />
+          )}
         </clipPath>
 
         {/* 2. Ondas Refletidas */}
