@@ -35,8 +35,7 @@ export interface SimulationSource {
   x: number; // m do referencial (0m)
   height: number; // m do solo
   soundPowerLevel: number; // dB de referência a 1m (Lp1m)
-  frequency: FrequencyHz;
-  spectrumType: 'pure_tone' | 'pink_noise' | 'industrial' | 'traffic';
+  frequency: FrequencyHz; // Frequência pura de análise (125 a 4000 Hz)
 }
 
 export interface SimulationBarrier {

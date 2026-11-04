@@ -32,7 +32,6 @@ const INITIAL_SOURCE: SimulationSource = {
   height: 1.5,
   soundPowerLevel: 90,
   frequency: 1000,
-  spectrumType: 'pure_tone',
 };
 
 const INITIAL_BARRIER: SimulationBarrier = {

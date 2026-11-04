@@ -64,7 +64,6 @@ describe('Motor Acústico - Testes Unitários de Física', () => {
       height: 1.5,
       soundPowerLevel: 90,
       frequency: 1000,
-      spectrumType: 'pure_tone',
     };
 
     const barrier: SimulationBarrier = {
@@ -98,7 +97,6 @@ describe('Motor Acústico - Testes Unitários de Física', () => {
       height: 1.5,
       soundPowerLevel: 90,
       frequency: 1000,
-      spectrumType: 'pure_tone',
     };
 
     const receiver: SimulationReceiver = {
@@ -136,7 +134,6 @@ describe('Motor Acústico - Testes Unitários de Física', () => {
       height: 1.5,
       soundPowerLevel: 90,
       frequency: 500,
-      spectrumType: 'pure_tone',
     };
 
     const receiver: SimulationReceiver = {

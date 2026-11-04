@@ -1,6 +1,5 @@
 import type {
   AcousticCalculationResult,
-  FrequencyHz,
   SimulationBarrier,
   SimulationReceiver,
   SimulationSource,
@@ -12,17 +11,6 @@ import {
 import { MATERIALS } from './materials';
 
 export const SPEED_OF_SOUND = 343; // m/s a 20°C no ar
-
-// Perfil espectral relativo em dB em relação ao nível de referência a 1000 Hz
-export const SPECTRUM_OFFSETS: Record<
-  SimulationSource['spectrumType'],
-  Record<FrequencyHz, number>
-> = {
-  pure_tone: { 125: 0, 250: 0, 500: 0, 1000: 0, 2000: 0, 4000: 0 },
-  pink_noise: { 125: 0, 250: 0, 500: 0, 1000: 0, 2000: 0, 4000: 0 },
-  industrial: { 125: 6, 250: 4, 500: 2, 1000: 0, 2000: -3, 4000: -8 },
-  traffic: { 125: -2, 250: 2, 500: 5, 1000: 0, 2000: -4, 4000: -10 },
-};
 
 /**
  * Calcula a atenuação por divergência geométrica em campo livre:
@@ -186,9 +174,7 @@ export function calculateAcoustics(
     barrierIsActive ? thicknessM : 0
   );
 
-  const spectralOffset = SPECTRUM_OFFSETS[source.spectrumType][selectedFreq] || 0;
-  const effectiveSourceLevel = source.soundPowerLevel + spectralOffset;
-
+  const effectiveSourceLevel = source.soundPowerLevel;
   const levelFreeField = calculateFreeFieldLevel(effectiveSourceLevel, d0);
   const nominalTransmissionLoss = material.transmissionLoss[selectedFreq] || 25;
   const materialTransmissionLoss = calculateEffectiveTransmissionLoss(
@@ -213,8 +199,7 @@ export function calculateAcoustics(
   }
 
   const spectrum = FREQUENCIES.map((f) => {
-    const sOffset = SPECTRUM_OFFSETS[source.spectrumType][f] || 0;
-    const sLevel = source.soundPowerLevel + sOffset;
+    const sLevel = source.soundPowerLevel;
     const freeFieldAtF = calculateFreeFieldLevel(sLevel, d0);
 
     const diffAtF = calculateDiffraction(

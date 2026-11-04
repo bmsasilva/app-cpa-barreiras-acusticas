@@ -37,7 +37,7 @@ export const CHALLENGES: Challenge[] = [
     objectiveText: 'Ajusta a altura e posição da barreira para alcançar uma redução sonora líquida (ΔL) ≥ 8.0 dB no recetor.',
     targetCriteria: 'Redução líquida ≥ 8.0 dB (com a habitação a 30m).',
     initialSetup: {
-      source: { x: 0, height: 1.5, soundPowerLevel: 90, frequency: 1000, spectrumType: 'pure_tone' },
+      source: { x: 0, height: 1.5, soundPowerLevel: 90, frequency: 1000 },
       barrier: { enabled: true, x: 8, height: 1.2, thickness: 0.15, materialId: 'betao', lengthM: 20 },
       receiver: { x: 30, height: 1.5 },
     },
@@ -71,10 +71,10 @@ export const CHALLENGES: Challenge[] = [
     description:
       'Compara uma barreira alta (ex: 4.5 m) em Betão vs. Chapa Metálica. Analisa a que frequências a chapa metálica deixa passar som por transmissão direta, comprometendo a eficácia da barreira.',
     objectiveText:
-      'Muda o material para Chapa Metálica e seleciona uma frequência baixa (125 Hz ou 250 Hz) ou ruído industrial. Observa como a baixa massa superficial (15.7 kg/m²) permite que o som transmitido supere o difratado!',
+      'Muda o material para Chapa Metálica e seleciona uma frequência baixa (125 Hz ou 250 Hz). Observa como a baixa massa superficial permite que o som transmitido supere o difratado!',
     targetCriteria: 'Selecionar material Chapa Metálica com frequência de 125 Hz ou 250 Hz e barreira ≥ 3.5 m.',
     initialSetup: {
-      source: { x: 0, height: 1.5, soundPowerLevel: 95, frequency: 125, spectrumType: 'industrial' },
+      source: { x: 0, height: 1.5, soundPowerLevel: 95, frequency: 125 },
       barrier: { enabled: true, x: 10, height: 4.0, thickness: 0.002, materialId: 'chapa', lengthM: 20 },
       receiver: { x: 30, height: 1.5 },
     },
@@ -108,7 +108,7 @@ export const CHALLENGES: Challenge[] = [
       'Encontra uma posição perto da fonte (x ≤ 5 m) ou perto da habitação (x ≥ 25 m) que maximize a atenuação relativamente à posição central.',
     targetCriteria: 'Altura fixa em 2.5 m (±0.3m) e posição x ≤ 5 m ou x ≥ 25 m, com redução sonora verificada.',
     initialSetup: {
-      source: { x: 0, height: 1.5, soundPowerLevel: 90, frequency: 1000, spectrumType: 'pure_tone' },
+      source: { x: 0, height: 1.5, soundPowerLevel: 90, frequency: 1000 },
       barrier: { enabled: true, x: 15, height: 2.5, thickness: 0.15, materialId: 'betao', lengthM: 20 },
       receiver: { x: 30, height: 1.5 },
     },
@@ -150,7 +150,7 @@ export const CHALLENGES: Challenge[] = [
       'Seleciona 4000 Hz e compara o número de Fresnel N e a atenuação obtida com o valor a 125 Hz.',
     targetCriteria: 'Selecionar 4000 Hz na fonte e observar o aumento do número de Fresnel (N > 10).',
     initialSetup: {
-      source: { x: 0, height: 1.5, soundPowerLevel: 90, frequency: 125, spectrumType: 'pure_tone' },
+      source: { x: 0, height: 1.5, soundPowerLevel: 90, frequency: 125 },
       barrier: { enabled: true, x: 8, height: 3.0, thickness: 0.15, materialId: 'betao', lengthM: 20 },
       receiver: { x: 30, height: 1.5 },
     },
@@ -180,7 +180,7 @@ export const CHALLENGES: Challenge[] = [
       'Concebe uma barreira que garanta uma redução sonora líquida ≥ 9.0 dB com um custo total estimado ≤ 3.500 €.',
     targetCriteria: 'Redução sonora ≥ 9.0 dB e Custo total ≤ 3.500 €.',
     initialSetup: {
-      source: { x: 0, height: 1.5, soundPowerLevel: 90, frequency: 1000, spectrumType: 'pink_noise' },
+      source: { x: 0, height: 1.5, soundPowerLevel: 90, frequency: 1000 },
       barrier: { enabled: true, x: 8, height: 3.5, thickness: 0.15, materialId: 'betao', lengthM: 20 },
       receiver: { x: 30, height: 1.5 },
     },

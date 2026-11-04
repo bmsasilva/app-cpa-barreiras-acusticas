@@ -312,36 +312,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               </span>
             </div>
 
-            <div>
-              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-2">
-                Perfil de Espectro
-              </label>
-              <div className="grid grid-cols-2 gap-1.5">
-                {[
-                  { id: 'pure_tone', label: 'Tom Puro (Mono)' },
-                  { id: 'pink_noise', label: 'Ruído Rosa' },
-                  { id: 'industrial', label: 'Ruído Industrial' },
-                  { id: 'traffic', label: 'Tráfego Rodoviário' },
-                ].map((spec) => (
-                  <button
-                    key={spec.id}
-                    onClick={() =>
-                      onUpdateSource({
-                        spectrumType: spec.id as SimulationSource['spectrumType'],
-                      })
-                    }
-                    className={`p-2 rounded-lg border text-left text-xs transition-all ${
-                      source.spectrumType === spec.id
-                        ? 'border-orange-500 bg-orange-950/40 text-white font-medium'
-                        : 'border-slate-800 bg-slate-950/40 text-slate-400 hover:border-slate-700'
-                    }`}
-                  >
-                    {spec.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             <div className="space-y-1.5 bg-slate-950/50 p-3 rounded-xl border border-slate-800">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-medium text-slate-200">Altura da Fonte (Solo)</span>
