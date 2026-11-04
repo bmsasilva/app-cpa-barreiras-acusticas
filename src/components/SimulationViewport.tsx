@@ -460,27 +460,9 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           <rect x={barTopPx.x} y="0" width={dimensions.width - barTopPx.x} height={dimensions.height} />
         </clipPath>
 
-        {/* 2. Difração no Topo */}
+        {/* 2. Difração no Topo (Frentes de Onda Secundárias) */}
         {toggles.showDiffractedWaves && barrier.enabled && barrier.height > 0.2 && (
           <g className="pointer-events-none">
-            <line
-              x1={srcPx.x}
-              y1={srcPx.y}
-              x2={barTopPx.x}
-              y2={barTopPx.y}
-              stroke="#c084fc"
-              strokeWidth="2.2"
-              strokeDasharray="5 3"
-            />
-            <line
-              x1={barTopPx.x}
-              y1={barTopPx.y}
-              x2={recPx.x}
-              y2={recPx.y}
-              stroke="#c084fc"
-              strokeWidth="2.2"
-              strokeDasharray="5 3"
-            />
             {incidentRays.map((wave, idx) => {
               const diffRadius = wave.radiusPx * 0.7;
               return (
