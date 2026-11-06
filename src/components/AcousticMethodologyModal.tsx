@@ -38,15 +38,22 @@ export const AcousticMethodologyModal: React.FC<AcousticMethodologyModalProps> =
         <div className="space-y-1.5 text-xs">
           <h4 className="font-bold text-sky-400 text-sm">1. Propagação em Campo Livre (Divergência Geométrica)</h4>
           <p className="leading-relaxed">
-            Para uma fonte pontual idealizada em espaço hemisférico sobre solo refletor, a perda por divergência
-            geométrica segue a expressão:
+            A atenuação por divergência geométrica depende da tipologia da fonte acústica selecionada:
           </p>
-          <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 font-mono text-center text-sky-300">
-            L₂ = L₁ − 20 · log₁₀(r₂ / r₁)
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-center font-mono text-[11px]">
+            <div className="bg-slate-950 p-2 rounded-xl border border-slate-800">
+              <span className="text-amber-400 font-semibold block mb-0.5">🏭 Fonte Pontual (Indústria)</span>
+              <span className="text-sky-300">L₂ = L₁ − 20 · log₁₀(r₂ / r₁)</span>
+              <span className="text-[10px] text-slate-500 block mt-0.5">Divergência esférica (−6 dB por duplicação)</span>
+            </div>
+            <div className="bg-slate-950 p-2 rounded-xl border border-slate-800">
+              <span className="text-blue-400 font-semibold block mb-0.5">🛣️ Fonte Linear (Estrada / Tráfego)</span>
+              <span className="text-sky-300">L₂ = L₁ − 10 · log₁₀(r₂ / r₁)</span>
+              <span className="text-[10px] text-slate-500 block mt-0.5">Divergência cilíndrica (−3 dB por duplicação)</span>
+            </div>
           </div>
           <p className="text-slate-400">
-            Onde L₁ é o nível sonoro a r₁ = 1,0 m e r₂ é a distância direta fonte-recetor (d₀). Cada duplicação da distância
-            resulta numa redução de 6 dB.
+            Onde L₁ é o nível de referência a r₁ = 1,0 m e r₂ é a distância direta fonte-recetor (d₀). O tráfego rodoviário contínuo atenua menos com a distância comparativamente a uma fonte pontual isolada.
           </p>
         </div>
 

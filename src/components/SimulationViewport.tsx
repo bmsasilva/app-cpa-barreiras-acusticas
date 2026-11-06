@@ -206,15 +206,47 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
     >
       {/* Barra de Ferramentas Superior do Laboratório */}
       <div className="absolute top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-auto">
-        <div className="flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700/80 text-xs shadow-lg">
-          <span className="flex items-center gap-1 font-semibold text-emerald-400">
-            <Volume2 className="w-4 h-4 text-emerald-400 animate-pulse" />
-            Laboratório Acústico 2D
-          </span>
-          <span className="text-slate-500">|</span>
-          <span className="text-slate-300">
-            Escala: <strong className="text-white">{WORLD_WIDTH_M}m</strong> × <strong className="text-white">{WORLD_HEIGHT_M}m</strong>
-          </span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700/80 text-xs shadow-lg">
+            <span className="flex items-center gap-1 font-semibold text-emerald-400">
+              <Volume2 className="w-4 h-4 text-emerald-400 animate-pulse" />
+              Laboratório 2D
+            </span>
+            <span className="text-slate-500">|</span>
+            <span className="text-slate-300">
+              <strong className="text-white">{WORLD_WIDTH_M}m</strong> × <strong className="text-white">{WORLD_HEIGHT_M}m</strong>
+            </span>
+          </div>
+
+          {/* Seletor Rápido de Modelo de Emissor: Fábrica (-6dB) vs Estrada (-3dB) */}
+          <div className="flex items-center bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/80 text-xs shadow-lg gap-1">
+            <button
+              type="button"
+              onClick={() => onUpdateSource({ sourceType: 'point' })}
+              className={`px-2.5 py-1 rounded-lg flex items-center gap-1 font-medium transition-all ${
+                source.sourceType !== 'line'
+                  ? 'bg-orange-600 text-white shadow-sm font-bold'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+              title="Fonte Pontual: Fábrica / Indústria (-6 dB por duplicação da distância)"
+            >
+              <span>🏭 Fábrica</span>
+              <span className="text-[10px] opacity-80 font-mono">(-6dB)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onUpdateSource({ sourceType: 'line' })}
+              className={`px-2.5 py-1 rounded-lg flex items-center gap-1 font-medium transition-all ${
+                source.sourceType === 'line'
+                  ? 'bg-amber-600 text-white shadow-sm font-bold'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+              title="Fonte Linear: Estrada com tráfego contínuo (-3 dB por duplicação da distância)"
+            >
+              <span>🛣️ Estrada</span>
+              <span className="text-[10px] opacity-80 font-mono">(-3dB)</span>
+            </button>
+          </div>
         </div>
 
         {/* Toggles Visuais Rápidos */}
@@ -542,65 +574,193 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           );
         })}
 
-        {/* FÁBRICA / FONTE SONORA */}
-        <g id="industrialFactory">
-          <rect
-            x={toPxX(0)}
-            y={toPxY(5.2)}
-            width={toPxX(3.5)}
-            height={groundYPx - toPxY(5.2)}
-            fill="#1e293b"
-            stroke="#334155"
-            strokeWidth="1.5"
-            rx="2"
-          />
-          <polygon
-            points={`
-              ${toPxX(0)},${toPxY(5.2)}
-              ${toPxX(1.7)},${toPxY(6.1)}
-              ${toPxX(1.7)},${toPxY(5.2)}
-              ${toPxX(3.5)},${toPxY(6.1)}
-              ${toPxX(3.5)},${toPxY(5.2)}
-            `}
-            fill="#334155"
-          />
-          <rect x={toPxX(0.6)} y={toPxY(7.2)} width={toPxX(0.7)} height={toPxY(5.2) - toPxY(7.2)} fill="#475569" />
-          <circle cx={toPxX(0.95)} cy={toPxY(7.5)} r="5" fill="#94a3b8" opacity="0.3" />
-          <circle cx={toPxX(1.1)} cy={toPxY(7.9)} r="7" fill="#cbd5e1" opacity="0.2" />
-
-          <rect x={toPxX(0.4)} y={toPxY(2.0)} width={toPxX(1.2)} height={groundYPx - toPxY(2.0)} fill="#0f172a" />
-          <rect x={toPxX(2.0)} y={toPxY(4.5)} width={toPxX(1.1)} height={toPxY(3.5) - toPxY(4.5)} fill="#38bdf8" opacity="0.25" />
-
-          <text x={toPxX(1.7)} y={toPxY(2.5)} fill="#cbd5e1" fontSize="10" textAnchor="middle" fontWeight="bold">
-            FÁBRICA
-          </text>
-          <text x={toPxX(1.7)} y={toPxY(1.5)} fill="#f97316" fontSize="9" textAnchor="middle">
-            {source.soundPowerLevel} dB @ {source.frequency}Hz
-          </text>
-
-          <g
-            className="cursor-move group"
-            onPointerDown={(e) => handlePointerDown('source_pos', e)}
-          >
-            <circle
-              cx={srcPx.x}
-              cy={srcPx.y}
-              r="16"
-              fill="#f97316"
-              fillOpacity="0.2"
-              className="animate-ping"
+        {/* EMISSOR ACÚSTICO: FÁBRICA (FONTE PONTUAL) OU ESTRADA (FONTE LINEAR) */}
+        {source.sourceType === 'line' ? (
+          <g id="roadTrafficSource">
+            {/* Plataforma da Estrada / Asfalto e Berma */}
+            <rect
+              x={toPxX(0)}
+              y={toPxY(2.2)}
+              width={toPxX(4.5)}
+              height={groundYPx - toPxY(2.2)}
+              fill="#0f172a"
+              stroke="#334155"
+              strokeWidth="1.5"
             />
-            <circle cx={srcPx.x} cy={srcPx.y} r="12" fill="#ea580c" stroke="#fed7aa" strokeWidth="2.5" />
-            <circle cx={srcPx.x} cy={srcPx.y} r="4" fill="#ffffff" />
+            {/* Faixa de rodagem de asfalto escuro */}
+            <rect
+              x={toPxX(0.2)}
+              y={toPxY(1.8)}
+              width={toPxX(4.1)}
+              height={groundYPx - toPxY(1.8)}
+              fill="#1e293b"
+            />
+            {/* Linha contínua amarela da berma */}
+            <line
+              x1={toPxX(0.4)}
+              y1={groundYPx - 3}
+              x2={toPxX(4.1)}
+              y2={groundYPx - 3}
+              stroke="#eab308"
+              strokeWidth="2.5"
+            />
+            {/* Marcas tracejadas brancas de separação de faixa */}
+            <line
+              x1={toPxX(0.6)}
+              y1={groundYPx - 18}
+              x2={toPxX(1.4)}
+              y2={groundYPx - 18}
+              stroke="#f8fafc"
+              strokeWidth="2"
+            />
+            <line
+              x1={toPxX(2.0)}
+              y1={groundYPx - 18}
+              x2={toPxX(2.8)}
+              y2={groundYPx - 18}
+              stroke="#f8fafc"
+              strokeWidth="2"
+            />
+            <line
+              x1={toPxX(3.4)}
+              y1={groundYPx - 18}
+              x2={toPxX(4.1)}
+              y2={groundYPx - 18}
+              stroke="#f8fafc"
+              strokeWidth="2"
+            />
 
-            <g transform={`translate(${srcPx.x + 16}, ${srcPx.y - 14})`}>
-              <rect x="0" y="0" width="62" height="18" rx="4" fill="#0f172a" stroke="#ea580c" strokeWidth="1" />
-              <text x="31" y="12" fill="#fdba74" fontSize="9" textAnchor="middle" fontWeight="bold">
-                Fonte: {source.height.toFixed(1)}m
+            {/* Veículo / Automóvel Estilizado em Trânsito */}
+            <g transform={`translate(${toPxX(0.6)}, ${groundYPx - 46})`}>
+              {/* Feixe de luz dos faróis a iluminar a estrada à frente */}
+              <polygon
+                points="75,22 155,8 155,34 75,26"
+                fill="#fef08a"
+                fillOpacity="0.15"
+              />
+              {/* Carroçaria inferior */}
+              <rect x="0" y="14" width="76" height="15" rx="3" fill="#0369a1" stroke="#38bdf8" strokeWidth="1.2" />
+              {/* Habitáculo / tejadilho com vidro */}
+              <polygon points="14,14 26,2 54,2 64,14" fill="#0284c7" stroke="#38bdf8" strokeWidth="1" />
+              <polygon points="17,13 27,4 51,4 60,13" fill="#0f172a" opacity="0.75" />
+              {/* Farol dianteiro */}
+              <rect x="72" y="17" width="4" height="6" rx="1" fill="#fef08a" />
+              {/* Farol traseiro */}
+              <rect x="0" y="17" width="3" height="6" rx="1" fill="#ef4444" />
+              {/* Rodas dianteira e traseira */}
+              <circle cx="18" cy="28" r="7" fill="#020617" stroke="#475569" strokeWidth="1.5" />
+              <circle cx="18" cy="28" r="2.5" fill="#94a3b8" />
+              <circle cx="58" cy="28" r="7" fill="#020617" stroke="#475569" strokeWidth="1.5" />
+              <circle cx="58" cy="28" r="2.5" fill="#94a3b8" />
+            </g>
+
+            {/* Poste de Sinalização Rodoviária */}
+            <g transform={`translate(${toPxX(4.0)}, ${groundYPx - 95})`}>
+              <line x1="0" y1="0" x2="0" y2="95" stroke="#64748b" strokeWidth="2" />
+              <circle cx="0" cy="0" r="11" fill="#ffffff" stroke="#ef4444" strokeWidth="3" />
+              <text x="0" y="4" fill="#0f172a" fontSize="8" textAnchor="middle" fontWeight="bold">
+                80
               </text>
             </g>
+
+            {/* Rótulos Descritivos da Estrada */}
+            <text x={toPxX(2.2)} y={toPxY(3.8)} fill="#f59e0b" fontSize="11" textAnchor="middle" fontWeight="bold">
+              ESTRADA / VIA RÁPIDA
+            </text>
+            <text x={toPxX(2.2)} y={toPxY(3.1)} fill="#fbbf24" fontSize="9" textAnchor="middle" fontWeight="medium">
+              Fonte Linear: -3 dB / duplicação
+            </text>
+            <text x={toPxX(2.2)} y={toPxY(2.5)} fill="#94a3b8" fontSize="8.5" textAnchor="middle">
+              {source.soundPowerLevel} dB @ {source.frequency}Hz
+            </text>
+
+            {/* Pega Interativa da Fonte Sonora */}
+            <g
+              className="cursor-move group"
+              onPointerDown={(e) => handlePointerDown('source_pos', e)}
+            >
+              <circle
+                cx={srcPx.x}
+                cy={srcPx.y}
+                r="16"
+                fill="#f59e0b"
+                fillOpacity="0.25"
+                className="animate-ping"
+              />
+              <circle cx={srcPx.x} cy={srcPx.y} r="12" fill="#d97706" stroke="#fef3c7" strokeWidth="2.5" />
+              <circle cx={srcPx.x} cy={srcPx.y} r="4" fill="#ffffff" />
+
+              <g transform={`translate(${srcPx.x + 16}, ${srcPx.y - 14})`}>
+                <rect x="0" y="0" width="70" height="18" rx="4" fill="#0f172a" stroke="#d97706" strokeWidth="1" />
+                <text x="35" y="12" fill="#fde68a" fontSize="9" textAnchor="middle" fontWeight="bold">
+                  Tráfego: {source.height.toFixed(1)}m
+                </text>
+              </g>
+            </g>
           </g>
-        </g>
+        ) : (
+          <g id="industrialFactory">
+            <rect
+              x={toPxX(0)}
+              y={toPxY(5.2)}
+              width={toPxX(3.5)}
+              height={groundYPx - toPxY(5.2)}
+              fill="#1e293b"
+              stroke="#334155"
+              strokeWidth="1.5"
+              rx="2"
+            />
+            <polygon
+              points={`
+                ${toPxX(0)},${toPxY(5.2)}
+                ${toPxX(1.7)},${toPxY(6.1)}
+                ${toPxX(1.7)},${toPxY(5.2)}
+                ${toPxX(3.5)},${toPxY(6.1)}
+                ${toPxX(3.5)},${toPxY(5.2)}
+              `}
+              fill="#334155"
+            />
+            <rect x={toPxX(0.6)} y={toPxY(7.2)} width={toPxX(0.7)} height={toPxY(5.2) - toPxY(7.2)} fill="#475569" />
+            <circle cx={toPxX(0.95)} cy={toPxY(7.5)} r="5" fill="#94a3b8" opacity="0.3" />
+            <circle cx={toPxX(1.1)} cy={toPxY(7.9)} r="7" fill="#cbd5e1" opacity="0.2" />
+
+            <rect x={toPxX(0.4)} y={toPxY(2.0)} width={toPxX(1.2)} height={groundYPx - toPxY(2.0)} fill="#0f172a" />
+            <rect x={toPxX(2.0)} y={toPxY(4.5)} width={toPxX(1.1)} height={toPxY(3.5) - toPxY(4.5)} fill="#38bdf8" opacity="0.25" />
+
+            <text x={toPxX(1.7)} y={toPxY(2.5)} fill="#cbd5e1" fontSize="10" textAnchor="middle" fontWeight="bold">
+              FÁBRICA
+            </text>
+            <text x={toPxX(1.7)} y={toPxY(1.9)} fill="#f97316" fontSize="8.5" textAnchor="middle">
+              Fonte Pontual: -6 dB / dupl.
+            </text>
+            <text x={toPxX(1.7)} y={toPxY(1.3)} fill="#94a3b8" fontSize="8.5" textAnchor="middle">
+              {source.soundPowerLevel} dB @ {source.frequency}Hz
+            </text>
+
+            <g
+              className="cursor-move group"
+              onPointerDown={(e) => handlePointerDown('source_pos', e)}
+            >
+              <circle
+                cx={srcPx.x}
+                cy={srcPx.y}
+                r="16"
+                fill="#f97316"
+                fillOpacity="0.2"
+                className="animate-ping"
+              />
+              <circle cx={srcPx.x} cy={srcPx.y} r="12" fill="#ea580c" stroke="#fed7aa" strokeWidth="2.5" />
+              <circle cx={srcPx.x} cy={srcPx.y} r="4" fill="#ffffff" />
+
+              <g transform={`translate(${srcPx.x + 16}, ${srcPx.y - 14})`}>
+                <rect x="0" y="0" width="62" height="18" rx="4" fill="#0f172a" stroke="#ea580c" strokeWidth="1" />
+                <text x="31" y="12" fill="#fdba74" fontSize="9" textAnchor="middle" fontWeight="bold">
+                  Fonte: {source.height.toFixed(1)}m
+                </text>
+              </g>
+            </g>
+          </g>
+        )}
 
         {/* HABITAÇÃO / RECETOR */}
         <g id="residentialReceiver">

@@ -32,6 +32,7 @@ const INITIAL_SOURCE: SimulationSource = {
   height: 1.5,
   soundPowerLevel: 90,
   frequency: 1000,
+  sourceType: 'point',
 };
 
 const INITIAL_BARRIER: SimulationBarrier = {
@@ -149,7 +150,13 @@ export function App() {
 
     doc.setFontSize(10);
     doc.text(`- Distância Fonte-Recetor: ${result.d0} m`, 16, 50);
-    doc.text(`- Altura da Fonte: ${source.height} m (Nível: ${source.soundPowerLevel} dB @ ${source.frequency} Hz)`, 16, 56);
+    doc.text(
+      `- Altura da Fonte: ${source.height} m (Nível: ${source.soundPowerLevel} dB @ ${source.frequency} Hz | ${
+        source.sourceType === 'line' ? 'Fonte Linear: Estrada (3 dB/dupl.)' : 'Fonte Pontual: Indústria (6 dB/dupl.)'
+      })`,
+      16,
+      56
+    );
     doc.text(`- Altura do Recetor: ${receiver.height} m na posição x = ${receiver.x} m`, 16, 62);
     doc.text(
       `- Barreira Acústica: ${barrier.enabled ? 'Ativada' : 'Desativada'} (x = ${barrier.x} m, Altura = ${barrier.height} m)`,

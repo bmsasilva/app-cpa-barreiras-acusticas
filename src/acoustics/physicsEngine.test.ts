@@ -12,10 +12,19 @@ import type { SimulationBarrier, SimulationReceiver, SimulationSource } from './
 describe('Motor Acústico - Testes Unitários de Física', () => {
   it('deve calcular a propagação em campo livre conforme a lei do inverso do quadrado (20 log10(r))', () => {
     const l1 = 90; // dB a 1 m
-    expect(calculateFreeFieldLevel(l1, 1)).toBeCloseTo(90, 1);
-    expect(calculateFreeFieldLevel(l1, 2)).toBeCloseTo(90 - 6.02, 1);
-    expect(calculateFreeFieldLevel(l1, 10)).toBeCloseTo(90 - 20, 1);
-    expect(calculateFreeFieldLevel(l1, 30)).toBeCloseTo(90 - 20 * Math.log10(30), 1);
+    expect(calculateFreeFieldLevel(l1, 1, 'point')).toBeCloseTo(90, 1);
+    expect(calculateFreeFieldLevel(l1, 2, 'point')).toBeCloseTo(90 - 6.02, 1);
+    expect(calculateFreeFieldLevel(l1, 10, 'point')).toBeCloseTo(90 - 20, 1);
+    expect(calculateFreeFieldLevel(l1, 30, 'point')).toBeCloseTo(90 - 20 * Math.log10(30), 1);
+  });
+
+  it('deve calcular a propagação em campo livre para fonte linear (estrada) com atenuação de 3 dB por duplicação (10 log10(r))', () => {
+    const l1 = 90; // dB a 1 m
+    expect(calculateFreeFieldLevel(l1, 1, 'line')).toBeCloseTo(90, 1);
+    expect(calculateFreeFieldLevel(l1, 2, 'line')).toBeCloseTo(90 - 3.01, 1);
+    expect(calculateFreeFieldLevel(l1, 4, 'line')).toBeCloseTo(90 - 6.02, 1);
+    expect(calculateFreeFieldLevel(l1, 10, 'line')).toBeCloseTo(90 - 10, 1);
+    expect(calculateFreeFieldLevel(l1, 30, 'line')).toBeCloseTo(90 - 10 * Math.log10(30), 1);
   });
 
   it('deve verificar corretamente a quebra da linha de visão (Line-of-Sight)', () => {

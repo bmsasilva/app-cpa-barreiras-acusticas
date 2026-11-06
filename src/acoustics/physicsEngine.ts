@@ -3,6 +3,7 @@ import type {
   SimulationBarrier,
   SimulationReceiver,
   SimulationSource,
+  SourceType,
 } from './types';
 import {
   A_WEIGHTING,
@@ -14,11 +15,17 @@ export const SPEED_OF_SOUND = 343; // m/s a 20°C no ar
 
 /**
  * Calcula a atenuação por divergência geométrica em campo livre:
- * L2 = L1 - 20 * log10(r2 / r1)
+ * - Fonte Pontual (Fábrica / Indústria): L2 = L1 - 20 * log10(r2 / r1) -> 6 dB / duplicação (esférica)
+ * - Fonte Linear (Estrada / Tráfego contínuo): L2 = L1 - 10 * log10(r2 / r1) -> 3 dB / duplicação (cilíndrica)
  */
-export function calculateFreeFieldLevel(sourceLevelL1: number, distanceR2: number): number {
+export function calculateFreeFieldLevel(
+  sourceLevelL1: number,
+  distanceR2: number,
+  sourceType: SourceType = 'point'
+): number {
   const r2Safe = Math.max(distanceR2, 1.0);
-  return sourceLevelL1 - 20 * Math.log10(r2Safe);
+  const factor = sourceType === 'line' ? 10 : 20;
+  return sourceLevelL1 - factor * Math.log10(r2Safe);
 }
 
 /**
@@ -167,6 +174,7 @@ export function calculateAcoustics(
   }
 
   const selectedFreq = source.frequency;
+  const sType = source.sourceType ?? 'point';
   const diffractionData = calculateDiffraction(
     pathDifference,
     selectedFreq,
@@ -175,7 +183,7 @@ export function calculateAcoustics(
   );
 
   const effectiveSourceLevel = source.soundPowerLevel;
-  const levelFreeField = calculateFreeFieldLevel(effectiveSourceLevel, d0);
+  const levelFreeField = calculateFreeFieldLevel(effectiveSourceLevel, d0, sType);
   const nominalTransmissionLoss = material.transmissionLoss[selectedFreq] || 25;
   const materialTransmissionLoss = calculateEffectiveTransmissionLoss(
     nominalTransmissionLoss,
@@ -200,7 +208,7 @@ export function calculateAcoustics(
 
   const spectrum = FREQUENCIES.map((f) => {
     const sLevel = source.soundPowerLevel;
-    const freeFieldAtF = calculateFreeFieldLevel(sLevel, d0);
+    const freeFieldAtF = calculateFreeFieldLevel(sLevel, d0, sType);
 
     const diffAtF = calculateDiffraction(
       pathDifference,
@@ -253,10 +261,11 @@ export function calculateAcoustics(
 
   const reflectionCoeff = Math.max(0, 1 - (material.alphaW || 0.05));
   const distSourceToBarrier = Math.hypot(barrier.x - source.x, barrier.height / 2 - source.height);
-  const incAtBarrier = calculateFreeFieldLevel(effectiveSourceLevel, distSourceToBarrier);
+  const incAtBarrier = calculateFreeFieldLevel(effectiveSourceLevel, distSourceToBarrier, sType);
   const reflectedLevelEstimate = incAtBarrier + 10 * Math.log10(Math.max(0.01, reflectionCoeff));
 
   return {
+    sourceType: sType,
     d0: Number(d0.toFixed(2)),
     d1: Number(d1.toFixed(2)),
     d2: Number(d2.toFixed(2)),
@@ -301,8 +310,9 @@ export function calculatePointSoundLevel(
   barrier: SimulationBarrier,
   mode: 'with_barrier' | 'without_barrier' | 'difference'
 ): number {
+  const sType = source.sourceType ?? 'point';
   const distDirect = Math.hypot(px - source.x, py - source.height);
-  const lFree = calculateFreeFieldLevel(source.soundPowerLevel, distDirect);
+  const lFree = calculateFreeFieldLevel(source.soundPowerLevel, distDirect, sType);
 
   if (mode === 'without_barrier' || !barrier.enabled || barrier.height <= 0.05) {
     return lFree;

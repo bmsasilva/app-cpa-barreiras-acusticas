@@ -210,6 +210,55 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         {/* ABA FONTE SONORA */}
         {activeTab === 'source' && (
           <div className="space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-2">
+                Tipo de Fonte Sonora & Propagação
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => onUpdateSource({ sourceType: 'point' })}
+                  className={`p-2.5 rounded-xl border text-left transition-all ${
+                    source.sourceType !== 'line'
+                      ? 'border-orange-500 bg-orange-950/40 text-white shadow-sm ring-1 ring-orange-500/50'
+                      : 'border-slate-800 bg-slate-950/40 text-slate-400 hover:border-slate-700 hover:bg-slate-800/40'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 font-bold text-xs text-white">
+                    <span>🏭</span>
+                    <span>Fonte Pontual</span>
+                  </div>
+                  <div className="text-[11px] text-orange-400 font-medium mt-1">
+                    Indústria / Fábrica
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">
+                    <strong>-6 dB</strong> por duplicação da distância (20 log₁₀ r)
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onUpdateSource({ sourceType: 'line' })}
+                  className={`p-2.5 rounded-xl border text-left transition-all ${
+                    source.sourceType === 'line'
+                      ? 'border-amber-500 bg-amber-950/40 text-white shadow-sm ring-1 ring-amber-500/50'
+                      : 'border-slate-800 bg-slate-950/40 text-slate-400 hover:border-slate-700 hover:bg-slate-800/40'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 font-bold text-xs text-white">
+                    <span>🛣️</span>
+                    <span>Fonte Linear</span>
+                  </div>
+                  <div className="text-[11px] text-amber-400 font-medium mt-1">
+                    Estrada / Tráfego
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">
+                    <strong>-3 dB</strong> por duplicação da distância (10 log₁₀ r)
+                  </div>
+                </button>
+              </div>
+            </div>
+
             <div className="space-y-1.5 bg-slate-950/50 p-3 rounded-xl border border-slate-800">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-medium text-slate-200">Nível de Pressão de Ref. (L₁)</span>

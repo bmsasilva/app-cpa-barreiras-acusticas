@@ -13,6 +13,7 @@ export const A_WEIGHTING: Record<FrequencyHz, number> = {
 };
 
 export type MaterialId = 'betao' | 'madeira' | 'chapa' | 'acrilico' | 'absorvente';
+export type SourceType = 'point' | 'line'; // 'point': Indústria (-6 dB/dupl.) | 'line': Estrada (-3 dB/dupl.)
 
 export interface AcousticMaterial {
   id: MaterialId;
@@ -36,6 +37,7 @@ export interface SimulationSource {
   height: number; // m do solo
   soundPowerLevel: number; // dB de referência a 1m (Lp1m)
   frequency: FrequencyHz; // Frequência pura de análise (125 a 4000 Hz)
+  sourceType?: SourceType; // 'point' (fábrica: 6 dB/dupl.) ou 'line' (estrada: 3 dB/dupl.)
 }
 
 export interface SimulationBarrier {
@@ -64,6 +66,7 @@ export interface AcousticCalculationResult {
   lineOfSightYAtBarrier: number; // Altura do raio direto no ponto x da barreira (m)
 
   // Níveis acústicos na frequência selecionada
+  sourceType: SourceType; // 'point' ou 'line'
   levelFreeField: number; // L_sem (dB)
   diffractionAttenuation: number; // ΔL_dif (dB)
   materialTransmissionLoss: number; // R(f) (dB)
