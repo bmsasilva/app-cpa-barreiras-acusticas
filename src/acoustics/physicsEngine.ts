@@ -275,6 +275,11 @@ export function calculateAcoustics(
     barrierIsActive ? thicknessM : 0
   );
 
+  // Efeito de Absorção Sonora na face e amortecimento do bordo superior (EN 1793-1 / EN 1793-4)
+  const alphaSelected = material.absorptionCoeff[selectedFreq] ?? material.alphaW ?? 0.05;
+  const absorptionBonusDb = barrierIsActive && isBroken ? Math.min(3.5, 3.0 * Math.pow(alphaSelected, 0.8)) : 0;
+  const effectiveDiffractionLoss = Math.min(28, diffractionData.diffractionLossDb + absorptionBonusDb);
+
   const effectiveSourceLevel = source.soundPowerLevel;
   const levelFreeField = calculateFreeFieldLevel(effectiveSourceLevel, d0, sType);
   const nominalTransmissionLoss = material.transmissionLoss[selectedFreq] || 25;
@@ -290,7 +295,7 @@ export function calculateAcoustics(
   let netReduction = 0;
 
   if (barrierIsActive) {
-    levelDiffracted = levelFreeField - diffractionData.diffractionLossDb;
+    levelDiffracted = levelFreeField - effectiveDiffractionLoss;
     levelTransmitted = levelFreeField - materialTransmissionLoss;
     levelWithBarrier = energeticSum(levelDiffracted, levelTransmitted);
     netReduction = Math.max(0, levelFreeField - levelWithBarrier);
@@ -309,6 +314,10 @@ export function calculateAcoustics(
       isBroken && barrierIsActive,
       barrierIsActive ? thicknessM : 0
     );
+    const alphaAtF = material.absorptionCoeff[f] ?? material.alphaW ?? 0.05;
+    const absBonusAtF = barrierIsActive && isBroken ? Math.min(3.5, 3.0 * Math.pow(alphaAtF, 0.8)) : 0;
+    const effectiveDiffAtF = Math.min(28, diffAtF.diffractionLossDb + absBonusAtF);
+
     const nominalTransAtF = material.transmissionLoss[f] || 25;
     const transLossAtF = calculateEffectiveTransmissionLoss(
       nominalTransAtF,
@@ -318,7 +327,7 @@ export function calculateAcoustics(
 
     let withBarrierAtF = freeFieldAtF;
     if (barrierIsActive) {
-      const lDif = freeFieldAtF - diffAtF.diffractionLossDb;
+      const lDif = freeFieldAtF - effectiveDiffAtF;
       const lTrans = freeFieldAtF - transLossAtF;
       withBarrierAtF = energeticSum(lDif, lTrans);
     }
@@ -328,7 +337,7 @@ export function calculateAcoustics(
       freeField: Number(freeFieldAtF.toFixed(1)),
       withBarrier: Number(withBarrierAtF.toFixed(1)),
       reduction: Number((freeFieldAtF - withBarrierAtF).toFixed(1)),
-      diffractionLoss: Number(diffAtF.diffractionLossDb.toFixed(1)),
+      diffractionLoss: Number(effectiveDiffAtF.toFixed(1)),
       transmissionLoss: Number(transLossAtF.toFixed(1)),
     };
   });
@@ -391,6 +400,7 @@ export function calculateAcoustics(
     effectiveThicknessM: Number(thicknessM.toFixed(3)),
     surfaceMassKgM2: Number(surfaceMassKgM2.toFixed(1)),
     thicknessDiffractionBonusDb: Number(diffractionData.thicknessBonusDb.toFixed(1)),
+    absorptionDiffractionBonusDb: Number(absorptionBonusDb.toFixed(1)),
 
     reflectionCoefficient: Number(reflectionCoeff.toFixed(2)),
     reflectedLevelEstimate: Number(reflectedLevelEstimate.toFixed(1)),
@@ -444,7 +454,11 @@ export function calculatePointSoundLevel(
   const nominalR = mat.transmissionLoss[source.frequency] || 25;
   const rMat = calculateEffectiveTransmissionLoss(nominalR, thicknessM, mat.defaultThicknessM);
 
-  const lDif = lFree - diffData.diffractionLossDb;
+  const alphaPt = mat.absorptionCoeff[source.frequency] ?? mat.alphaW ?? 0.05;
+  const absBonusPt = los.isBroken ? Math.min(3.5, 3.0 * Math.pow(alphaPt, 0.8)) : 0;
+  const effectiveDiffLoss = Math.min(28, diffData.diffractionLossDb + absBonusPt);
+
+  const lDif = lFree - effectiveDiffLoss;
   const lTrans = lFree - rMat;
   const lWith = energeticSum(lDif, lTrans);
 

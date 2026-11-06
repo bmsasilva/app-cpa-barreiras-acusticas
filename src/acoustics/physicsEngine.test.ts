@@ -221,4 +221,21 @@ describe('Motor Acústico - Testes Unitários de Física', () => {
     const resCloseAcrylic = calculateAcoustics({ x: 0, height: 1.5, soundPowerLevel: 90, frequency: 1000 }, barrierCloseAcrylic, receiver);
     expect(resCloseAcrylic.residentAnnoyance.score).toBeLessThan(resCloseConcrete.residentAnnoyance.score);
   });
+
+  it('deve garantir que o Painel Absorvente (EN 1793-1) supera materiais refletores na atenuação global', () => {
+    const source: SimulationSource = { x: 0, height: 1.5, soundPowerLevel: 90, frequency: 1000 };
+    const receiver: SimulationReceiver = { x: 30, height: 1.5 };
+    const barrierBase = { enabled: true, x: 10, height: 3.5, lengthM: 20 };
+
+    const resAbsorvente = calculateAcoustics(source, { ...barrierBase, materialId: 'absorvente', thickness: 0.10 }, receiver);
+    const resBetao = calculateAcoustics(source, { ...barrierBase, materialId: 'betao', thickness: 0.15 }, receiver);
+    const resChapa = calculateAcoustics(source, { ...barrierBase, materialId: 'chapa', thickness: 0.002 }, receiver);
+
+    // O painel absorvente deve conferir bónus de atenuação face ao betão refletor
+    expect(resAbsorvente.netReduction).toBeGreaterThan(resBetao.netReduction);
+    expect(resAbsorvente.netReductionA).toBeGreaterThan(resBetao.netReductionA);
+
+    // O betão e absorvente devem ambos superar amplamente a chapa fina
+    expect(resBetao.netReduction).toBeGreaterThan(resChapa.netReduction);
+  });
 });
