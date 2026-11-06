@@ -11,7 +11,6 @@ import { MATERIALS } from '../acoustics/materials';
 import {
   AlertCircle,
   CheckCircle2,
-  Coins,
   FileText,
   Home,
   Layers,
@@ -44,9 +43,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const curMaterial = MATERIALS[barrier.materialId] || MATERIALS.betao;
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl flex flex-col h-full shadow-xl overflow-hidden">
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl flex flex-col h-[520px] lg:h-[580px] max-h-[580px] shadow-xl overflow-hidden">
       {/* Abas Superiores de Controlo */}
-      <div className="grid grid-cols-4 border-b border-slate-800 bg-slate-950/60 text-xs font-medium">
+      <div className="grid grid-cols-4 border-b border-slate-800 bg-slate-950/60 text-xs font-medium shrink-0">
         <button
           onClick={() => setActiveTab('barrier')}
           className={`py-3 px-2 flex flex-col items-center gap-1 transition-all ${
@@ -121,9 +120,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-2">
-                Material Construtivo
-              </label>
               <div className="grid grid-cols-1 gap-2">
                 {(Object.keys(MATERIALS) as MaterialId[]).map((mId) => {
                   const mat = MATERIALS[mId];
@@ -188,21 +184,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               <div className="text-[10px] text-sky-400/80 bg-sky-950/30 px-2 py-1 rounded border border-sky-900/40">
                 💡 A espessura aumenta o isolamento por transmissão (Lei da Massa) e cria duplo bordo difrativo no topo largo (+{result.thicknessDiffractionBonusDb} dB).
               </div>
-            </div>
-
-            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Coins className="w-4 h-4 text-amber-400" />
-                <div>
-                  <span className="text-xs text-slate-300 font-medium block">Orçamento Fictício</span>
-                  <span className="text-[10px] text-slate-500">
-                    Área: {result.totalAreaM2} m² @ {curMaterial.costPerM2} €/m²
-                  </span>
-                </div>
-              </div>
-              <span className="font-mono font-bold text-amber-400 text-base">
-                {result.totalCostEuro.toLocaleString('pt-PT')} €
-              </span>
             </div>
           </div>
         )}
