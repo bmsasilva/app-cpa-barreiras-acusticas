@@ -217,7 +217,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => onUpdateSource({ sourceType: 'point' })}
+                  onClick={() => onUpdateSource({ sourceType: 'point', frequency: 250 })}
                   className={`p-2.5 rounded-xl border text-left transition-all ${
                     source.sourceType !== 'line'
                       ? 'border-orange-500 bg-orange-950/40 text-white shadow-sm ring-1 ring-orange-500/50'
@@ -232,13 +232,13 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     Indústria / Fábrica
                   </div>
                   <div className="text-[10px] text-slate-400 mt-0.5">
-                    Divergência esférica (espaço livre)
+                    Divergência esférica (250 Hz)
                   </div>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => onUpdateSource({ sourceType: 'line' })}
+                  onClick={() => onUpdateSource({ sourceType: 'line', frequency: 1000 })}
                   className={`p-2.5 rounded-xl border text-left transition-all ${
                     source.sourceType === 'line'
                       ? 'border-amber-500 bg-amber-950/40 text-white shadow-sm ring-1 ring-amber-500/50'
@@ -253,7 +253,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     Estrada / Tráfego
                   </div>
                   <div className="text-[10px] text-slate-400 mt-0.5">
-                    Divergência cilíndrica (fluxo contínuo)
+                    Divergência cilíndrica (1000 Hz)
                   </div>
                 </button>
               </div>

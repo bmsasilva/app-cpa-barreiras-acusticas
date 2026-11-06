@@ -8,8 +8,6 @@ import type {
 import { MATERIALS } from '../acoustics/materials';
 import { AcousticHeatmap } from './AcousticHeatmap';
 import {
-  Eye,
-  EyeOff,
   Flame,
   Gauge,
   Maximize2,
@@ -227,25 +225,25 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           <div className="flex items-center bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/80 text-xs shadow-lg gap-1">
             <button
               type="button"
-              onClick={() => onUpdateSource({ sourceType: 'point' })}
+              onClick={() => onUpdateSource({ sourceType: 'point', frequency: 250 })}
               className={`px-3 py-1 rounded-lg flex items-center gap-1.5 font-medium transition-all ${
                 source.sourceType !== 'line'
                   ? 'bg-orange-600 text-white shadow-sm font-bold'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
-              title="Fonte Pontual: Fábrica / Indústria"
+              title="Fonte Pontual: Fábrica / Indústria (250 Hz)"
             >
               <span>🏭 Fábrica</span>
             </button>
             <button
               type="button"
-              onClick={() => onUpdateSource({ sourceType: 'line' })}
+              onClick={() => onUpdateSource({ sourceType: 'line', frequency: 1000 })}
               className={`px-3 py-1 rounded-lg flex items-center gap-1.5 font-medium transition-all ${
                 source.sourceType === 'line'
                   ? 'bg-amber-600 text-white shadow-sm font-bold'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
-              title="Fonte Linear: Estrada / Tráfego rodoviário"
+              title="Fonte Linear: Estrada / Tráfego rodoviário (1000 Hz)"
             >
               <span>🛣️ Estrada</span>
             </button>
@@ -314,19 +312,6 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
               <option value="difference">Atenuação ΔL (dB)</option>
             </select>
           )}
-
-          <button
-            onClick={() => onUpdateToggles({ showLineOfSight: !toggles.showLineOfSight })}
-            title="Linha de Visão Direta (LOS)"
-            className={`px-2 py-1 rounded-lg flex items-center gap-1 font-medium transition-all ${
-              toggles.showLineOfSight
-                ? 'bg-cyan-600/80 text-white'
-                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-            }`}
-          >
-            {toggles.showLineOfSight ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">Visão (LOS)</span>
-          </button>
 
           <button
             onClick={onReset}
@@ -544,16 +529,16 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           <rect x={barTopPx.x} y="0" width={dimensions.width - barTopPx.x} height={dimensions.height} />
         </clipPath>
 
-        {/* LINHA DE VISÃO DIRETA (LOS) - Apenas exibida em verde quando desimpedida */}
-        {toggles.showLineOfSight && !result.isLineOfSightBroken && (
+        {/* LINHA DE VISÃO DIRETA (LOS) - Sempre ativa; exibida em vermelho quando desimpedida */}
+        {!result.isLineOfSightBroken && (
           <g className="pointer-events-none">
             <line
               x1={srcPx.x}
               y1={srcPx.y}
               x2={recPx.x}
               y2={recPx.y}
-              stroke="#10b981"
-              strokeWidth="2"
+              stroke="#ef4444"
+              strokeWidth="2.2"
               strokeDasharray="6 4"
             />
           </g>

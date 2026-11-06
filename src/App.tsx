@@ -31,7 +31,7 @@ const INITIAL_SOURCE: SimulationSource = {
   x: 0,
   height: 1.5,
   soundPowerLevel: 90,
-  frequency: 1000,
+  frequency: 250,
   sourceType: 'point',
 };
 
@@ -55,7 +55,7 @@ const INITIAL_TOGGLES: ViewportToggles = {
   showDiffractedWaves: true,
   showTransmittedWaves: false,
   showHeatmap: false,
-  showLineOfSight: false,
+  showLineOfSight: true,
   showShadowZone: true,
   showDimensions: true,
   heatmapMode: 'with_barrier',
