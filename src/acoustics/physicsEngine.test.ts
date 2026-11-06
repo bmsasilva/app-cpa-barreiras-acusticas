@@ -3,11 +3,12 @@ import {
   calculateAcoustics,
   calculateDiffraction,
   calculateFreeFieldLevel,
+  calculateIndoorAcoustics,
   checkLineOfSight,
   energeticSum,
   SPEED_OF_SOUND,
 } from './physicsEngine';
-import type { SimulationBarrier, SimulationReceiver, SimulationSource } from './types';
+import type { IndoorHallState, SimulationBarrier, SimulationReceiver, SimulationSource } from './types';
 
 describe('Motor Acústico - Testes Unitários de Física', () => {
   it('deve calcular a propagação em campo livre conforme a lei do inverso do quadrado (20 log10(r))', () => {
@@ -237,5 +238,58 @@ describe('Motor Acústico - Testes Unitários de Física', () => {
 
     // O betão e absorvente devem ambos superar amplamente a chapa fina
     expect(resBetao.netReduction).toBeGreaterThan(resChapa.netReduction);
+  });
+
+  describe('Nave Industrial (Acústica de Salas - Modelo Hopkins-Stryker / Sabine)', () => {
+    const baseHallState: IndoorHallState = {
+      roomLengthM: 24,
+      roomWidthM: 15,
+      roomHeightM: 6.5,
+      wallAlpha: 0.05, // Superfícies rígidas (betão/chapa)
+      bafflesEnabled: false,
+      bafflesCount: 40,
+      baffleUnitAbsorptionM2: 1.2,
+      machineSoundPowerLw: 98,
+      machineX: 2.0,
+      machineDirectivityQ: 2, // Hemisférica sobre o solo
+      operatorDistanceM: 2.0, // Posto A
+    };
+
+    it('deve reproduzir o comportamento do slide: após a distância crítica, mudar de Posto A (2m) para Posto B (6m) quase não altera o nível sonoro', () => {
+      const resWithoutBaffles = calculateIndoorAcoustics(baseHallState);
+
+      // Distância crítica deve ser pequena numa sala reverberante com α=0.05 (~1.6 m)
+      expect(resWithoutBaffles.criticalDistanceRc).toBeGreaterThan(1.0);
+      expect(resWithoutBaffles.criticalDistanceRc).toBeLessThan(3.0);
+
+      // No Posto B (6 m), o operador está amplamente no campo reverberado
+      const resPostoB = calculateIndoorAcoustics({ ...baseHallState, operatorDistanceM: 6.0 });
+      expect(resPostoB.isOperatorInReverberantField).toBe(true);
+
+      // Em campo livre, passar de 2m para 6m (fator 3x) atenuaria 20*log10(3) ≈ 9.5 dB.
+      // Na nave industrial reverberante, o som reverberado domina e a diferença cai para menos de 2 dB!
+      expect(resWithoutBaffles.diffPostoABDb).toBeLessThan(2.0);
+      expect(resWithoutBaffles.levelAt2m - resWithoutBaffles.levelAt6m).toBeLessThan(2.0);
+    });
+
+    it('deve demonstrar que a instalação de baffles absorventes reduz significativamente o ruído no campo reverberado', () => {
+      const resWithoutBaffles = calculateIndoorAcoustics({ ...baseHallState, operatorDistanceM: 6.0 });
+      // Instalar 60 baffles de 1.5 m² (área de absorção equivalente adicionada = 90 m²)
+      const resWithBaffles = calculateIndoorAcoustics({
+        ...baseHallState,
+        operatorDistanceM: 6.0,
+        bafflesEnabled: true,
+        bafflesCount: 60,
+        baffleUnitAbsorptionM2: 1.5,
+      });
+
+      // Baffles aumentam a constante de sala R e a distância crítica rc
+      expect(resWithBaffles.roomConstantR).toBeGreaterThan(resWithoutBaffles.roomConstantR);
+      expect(resWithBaffles.criticalDistanceRc).toBeGreaterThan(resWithoutBaffles.criticalDistanceRc);
+
+      // A atenuação proporcionada pelos baffles no Posto B (campo reverberado) deve ser relevante (≥ 3 dB)
+      expect(resWithBaffles.baffleNoiseReductionDb).toBeGreaterThanOrEqual(3.0);
+      expect(resWithBaffles.levelTotal).toBeLessThan(resWithoutBaffles.levelTotal);
+    });
   });
 });

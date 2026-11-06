@@ -12,6 +12,7 @@ export const A_WEIGHTING: Record<FrequencyHz, number> = {
   4000: 1.0,
 };
 
+export type ViewMode = 'outdoor_barrier' | 'indoor_hall';
 export type MaterialId = 'betao' | 'madeira' | 'chapa' | 'acrilico' | 'absorvente';
 export type SourceType = 'point' | 'line';
 export type AnnoyanceLevel = 'low' | 'moderate' | 'high' | 'critical';
@@ -23,6 +24,38 @@ export interface ResidentAnnoyance {
   color: string; // Hexadecimal da cor para UI
   distanceToFacadeM: number; // Distância horizontal da barreira à fachada (m)
   occlusionAngleDeg: number; // Ângulo de oclusão visual da janela (graus)
+}
+
+export interface IndoorHallState {
+  roomLengthM: number; // Comprimento da nave (m), ex: 24 m
+  roomWidthM: number; // Largura da nave (m), ex: 15 m
+  roomHeightM: number; // Altura da nave (m), ex: 6.5 m
+  wallAlpha: number; // Coeficiente médio das superfícies rígidas (betão/aço), ex: 0.05
+  bafflesEnabled: boolean; // Ativação de baffles acústicos no teto
+  bafflesCount: number; // Número de unidades de baffles suspensos (ex: 40)
+  baffleUnitAbsorptionM2: number; // Área equivalente de absorção por baffle (m²), ex: 1.2 m²
+  machineSoundPowerLw: number; // Nível de potência sonora Lw da máquina (dB), ex: 98 dB
+  machineX: number; // Posição horizontal da máquina (m), ex: 2.0 m
+  machineDirectivityQ: number; // Fator de diretividade Q (2 = hemisférica sobre o solo)
+  operatorDistanceM: number; // Distância do operador à máquina (m), ex: 2.0 m ou 6.0 m
+}
+
+export interface IndoorAcousticResult {
+  roomAreaS: number; // Área total das superfícies da sala (m²)
+  roomVolumeV: number; // Volume total da nave (m³)
+  totalAbsorptionA: number; // Absorção total equivalente A (m²)
+  roomConstantR: number; // Constante da sala R = S * α / (1 - α) (m²)
+  meanAlpha: number; // Coeficiente médio de absorção αm
+  criticalDistanceRc: number; // Distância crítica rc = √(Q * R / (16 * π)) (m)
+  levelDirect: number; // Componente de som direto Lp,dir (dB)
+  levelReverberant: number; // Componente de som reverberado Lp,rev (dB)
+  levelTotal: number; // Nível sonoro total Lp,total (dB)
+  levelTotalWithoutBaffles: number; // Nível sonoro total sem baffles (dB)
+  baffleNoiseReductionDb: number; // Atenuação obtida com baffles ΔL (dB)
+  isOperatorInReverberantField: boolean; // Se operador está além da distância crítica (r > rc)
+  levelAt2m: number; // Nível no Posto A (2 m)
+  levelAt6m: number; // Nível no Posto B (6 m)
+  diffPostoABDb: number; // Diferença entre Posto A e Posto B (|Lp,2m - Lp,6m|)
 } // 'point': Indústria (-6 dB/dupl.) | 'line': Estrada (-3 dB/dupl.)
 
 export interface AcousticMaterial {

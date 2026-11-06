@@ -1,6 +1,8 @@
 import type {
   AcousticCalculationResult,
   AnnoyanceLevel,
+  IndoorAcousticResult,
+  IndoorHallState,
   MaterialId,
   ResidentAnnoyance,
   SimulationBarrier,
@@ -467,4 +469,99 @@ export function calculatePointSoundLevel(
   }
 
   return lWith;
+}
+
+/**
+ * Calcula a acústica no interior de uma nave industrial fechada através da equação
+ * de Hopkins-Stryker / Sabine:
+ * Lp(r) = Lw + 10 * log10( Q / (4 * π * r²) + 4 / R )
+ *
+ * Demonstra a distância crítica (rc) além da qual o som direto se torna irrelevante
+ * e o som reverberado das superfícies rígidas passa a dominar, tornando a deslocação
+ * do operador (ex: de 2m para 6m) praticamente ineficaz sem tratamento absorvente no teto (baffles).
+ */
+export function calculateIndoorAcoustics(state: IndoorHallState): IndoorAcousticResult {
+  const L = Math.max(5, state.roomLengthM);
+  const W = Math.max(5, state.roomWidthM);
+  const H = Math.max(3, state.roomHeightM);
+
+  const roomAreaS = 2 * (L * W + L * H + W * H);
+  const roomVolumeV = L * W * H;
+
+  // Absorção base das paredes/teto/piso rígidos (betão, chapa)
+  const baseWallAlpha = Math.max(0.01, Math.min(0.95, state.wallAlpha));
+  const baseAbsorptionA = roomAreaS * baseWallAlpha;
+
+  // Absorção adicional introduzida por baffles acústicos suspensos no teto
+  const bafflesArea = state.bafflesEnabled
+    ? Math.max(0, state.bafflesCount) * Math.max(0.1, state.baffleUnitAbsorptionM2)
+    : 0;
+
+  const totalAbsorptionA = baseAbsorptionA + bafflesArea;
+  const meanAlpha = Math.min(0.98, totalAbsorptionA / roomAreaS);
+
+  // Constante de sala R = S * αm / (1 - αm)
+  const roomConstantR = (roomAreaS * meanAlpha) / (1 - meanAlpha);
+
+  // Fator de diretividade da máquina (Q = 2 para máquina pousada sobre o solo da nave)
+  const Q = Math.max(1, state.machineDirectivityQ || 2);
+
+  // Distância Crítica rc: distância onde a densidade de energia direta iguala a reverberada:
+  // Q / (4 * π * rc²) = 4 / R  =>  rc = √( (Q * R) / (16 * π) )
+  const criticalDistanceRc = Math.sqrt((Q * roomConstantR) / (16 * Math.PI));
+
+  // Função auxiliar para calcular Lp a uma dada distância r da máquina
+  const computeLevelAtDistance = (rM: number, R_val: number): {
+    dir: number;
+    rev: number;
+    total: number;
+  } => {
+    const rSafe = Math.max(0.3, rM);
+    const directEnergy = Q / (4 * Math.PI * rSafe * rSafe);
+    const revEnergy = 4 / Math.max(0.1, R_val);
+
+    const levelDirect = state.machineSoundPowerLw + 10 * Math.log10(directEnergy);
+    const levelReverberant = state.machineSoundPowerLw + 10 * Math.log10(revEnergy);
+    const levelTotal = state.machineSoundPowerLw + 10 * Math.log10(directEnergy + revEnergy);
+
+    return {
+      dir: Number(levelDirect.toFixed(1)),
+      rev: Number(levelReverberant.toFixed(1)),
+      total: Number(levelTotal.toFixed(1)),
+    };
+  };
+
+  // Cálculo para o estado atual
+  const rOp = Math.max(0.3, state.operatorDistanceM);
+  const currentLevels = computeLevelAtDistance(rOp, roomConstantR);
+
+  // Cálculo correspondente sem baffles (para quantificar a redução)
+  const meanAlphaNoBaffles = Math.min(0.98, baseAbsorptionA / roomAreaS);
+  const roomConstantRNoBaffles = (roomAreaS * meanAlphaNoBaffles) / (1 - meanAlphaNoBaffles);
+  const noBafflesLevels = computeLevelAtDistance(rOp, roomConstantRNoBaffles);
+
+  // Níveis específicos nos pontos didáticos do slide: Posto A (2 m) e Posto B (6 m)
+  const levelAt2m = computeLevelAtDistance(2.0, roomConstantR).total;
+  const levelAt6m = computeLevelAtDistance(6.0, roomConstantR).total;
+  const diffPostoABDb = Number(Math.abs(levelAt2m - levelAt6m).toFixed(1));
+
+  const baffleNoiseReductionDb = Number(Math.max(0, noBafflesLevels.total - currentLevels.total).toFixed(1));
+
+  return {
+    roomAreaS: Number(roomAreaS.toFixed(1)),
+    roomVolumeV: Number(roomVolumeV.toFixed(1)),
+    totalAbsorptionA: Number(totalAbsorptionA.toFixed(1)),
+    roomConstantR: Number(roomConstantR.toFixed(1)),
+    meanAlpha: Number(meanAlpha.toFixed(3)),
+    criticalDistanceRc: Number(criticalDistanceRc.toFixed(2)),
+    levelDirect: currentLevels.dir,
+    levelReverberant: currentLevels.rev,
+    levelTotal: currentLevels.total,
+    levelTotalWithoutBaffles: noBafflesLevels.total,
+    baffleNoiseReductionDb,
+    isOperatorInReverberantField: rOp > criticalDistanceRc,
+    levelAt2m,
+    levelAt6m,
+    diffPostoABDb,
+  };
 }
