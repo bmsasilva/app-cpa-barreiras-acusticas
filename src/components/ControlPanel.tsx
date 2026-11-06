@@ -10,10 +10,12 @@ import { FREQUENCIES } from '../acoustics/types';
 import { MATERIALS } from '../acoustics/materials';
 import {
   AlertCircle,
+  Check,
   CheckCircle2,
   FileText,
   Home,
   Layers,
+  Lightbulb,
   Volume2,
 } from 'lucide-react';
 
@@ -39,8 +41,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onReset: _onReset,
 }) => {
   const [activeTab, setActiveTab] = useState<'barrier' | 'source' | 'receiver' | 'datasheet'>('barrier');
+  const [inspectedMaterialId, setInspectedMaterialId] = useState<MaterialId>(barrier.materialId);
 
   const curMaterial = MATERIALS[barrier.materialId] || MATERIALS.betao;
+  const inspectedMat = MATERIALS[inspectedMaterialId] || curMaterial;
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl flex flex-col h-[520px] lg:h-[580px] max-h-[580px] shadow-xl overflow-hidden">
@@ -350,60 +354,192 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           </div>
         )}
 
-        {/* ABA FICHA TÉCNICA */}
+        {/* ABA FICHA TÉCNICA E MATERIAIS */}
         {activeTab === 'datasheet' && (
-          <div className="space-y-3">
-            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
-              <div className="flex items-center justify-between">
-                <h4 className="font-bold text-white text-sm">{curMaterial.name}</h4>
-                <span className="text-[11px] px-2 py-0.5 rounded bg-sky-950 text-sky-400 border border-sky-800">
-                  {curMaterial.patternType}
-                </span>
+          <div className="space-y-3.5">
+            {/* SELETOR DE TODOS OS MATERIAIS */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-semibold text-slate-300 block">
+                Explorar Materiais Construtivos:
+              </span>
+              <div className="grid grid-cols-2 gap-1.5">
+                {(Object.keys(MATERIALS) as MaterialId[]).map((mId) => {
+                  const mat = MATERIALS[mId];
+                  const isInspected = inspectedMaterialId === mId;
+                  const isApplied = barrier.materialId === mId;
+                  return (
+                    <button
+                      key={mId}
+                      type="button"
+                      onClick={() => setInspectedMaterialId(mId)}
+                      className={`p-2 rounded-xl text-left border transition-all flex items-center justify-between gap-1.5 ${
+                        isInspected
+                          ? 'border-indigo-500 bg-indigo-950/50 text-white ring-1 ring-indigo-500/50 shadow-sm'
+                          : 'border-slate-800 bg-slate-950/50 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <span
+                          className="w-3 h-3 rounded-full shrink-0 border border-white/20"
+                          style={{ backgroundColor: mat.color }}
+                        />
+                        <span className="text-xs font-medium truncate">{mat.name}</span>
+                      </div>
+                      {isApplied && (
+                        <span className="text-[9px] px-1.5 py-0.5 bg-emerald-950 text-emerald-400 border border-emerald-800/80 rounded font-semibold shrink-0">
+                          Na Barreira
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed">{curMaterial.description}</p>
             </div>
 
+            {/* AÇÃO DE APLICAÇÃO À BARREIRA */}
+            <div>
+              {barrier.materialId !== inspectedMaterialId ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onUpdateBarrier({
+                      materialId: inspectedMaterialId,
+                      enabled: true,
+                      thickness: inspectedMat.defaultThicknessM,
+                    })
+                  }
+                  className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-950 cursor-pointer"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Aplicar {inspectedMat.name} à Barreira Exterior</span>
+                </button>
+              ) : (
+                <div className="py-1.5 px-3 rounded-xl bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 text-xs font-medium flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>Material atualmente em uso na simulação exterior</span>
+                </div>
+              )}
+            </div>
+
+            {/* FICHA TÉCNICA DO MATERIAL EM ANÁLISE */}
+            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-3.5 h-3.5 rounded-full border border-white/20 shrink-0"
+                    style={{ backgroundColor: inspectedMat.color }}
+                  />
+                  <h4 className="font-bold text-white text-sm">{inspectedMat.name}</h4>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 font-mono">
+                  {inspectedMat.patternType}
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed">{inspectedMat.description}</p>
+            </div>
+
+            {/* PROPRIEDADES ACÚSTICAS E FÍSICAS */}
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800">
                 <span className="text-[10px] text-slate-500 block">Massa Volúmica (ρ)</span>
-                <span className="font-mono font-bold text-slate-200 text-sm">{curMaterial.densityKgM3} kg/m³</span>
+                <span className="font-mono font-bold text-slate-200 text-sm">{inspectedMat.densityKgM3} kg/m³</span>
               </div>
 
               <div className="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800">
                 <span className="text-[10px] text-slate-500 block">Massa Superficial (m'')</span>
-                <span className="font-mono font-bold text-slate-200 text-sm">{curMaterial.surfaceMassKgM2} kg/m²</span>
+                <span className="font-mono font-bold text-slate-200 text-sm">{inspectedMat.surfaceMassKgM2} kg/m²</span>
               </div>
 
               <div className="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800">
                 <span className="text-[10px] text-slate-500 block">Índice Isolamento (Rw)</span>
-                <span className="font-mono font-bold text-sky-400 text-sm">{curMaterial.rw} dB</span>
+                <span className="font-mono font-bold text-sky-400 text-sm">{inspectedMat.rw} dB</span>
               </div>
 
               <div className="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800">
                 <span className="text-[10px] text-slate-500 block">Coef. Absorção (αw)</span>
-                <span className="font-mono font-bold text-emerald-400 text-sm">{curMaterial.alphaW}</span>
+                <span className="font-mono font-bold text-emerald-400 text-sm">{inspectedMat.alphaW}</span>
               </div>
             </div>
 
-            <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800 space-y-1.5">
+            {/* ESPECTRO DE ISOLAMENTO E ABSORÇÃO */}
+            <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800 space-y-2">
               <span className="text-[11px] font-semibold text-slate-300 block">
-                Isolamento por Frequência R(f) [dB]
+                Comportamento por Frequência [125 Hz – 4000 Hz]
               </span>
-              <div className="grid grid-cols-6 gap-1 text-center font-mono text-[10px]">
-                {FREQUENCIES.map((f) => (
-                  <div key={f} className="bg-slate-900 p-1 rounded border border-slate-800">
-                    <div className="text-slate-500">{f}</div>
-                    <div className="font-bold text-slate-200">{curMaterial.transmissionLoss[f]} dB</div>
+              <div className="space-y-1.5 font-mono text-[10px]">
+                <div className="grid grid-cols-7 gap-1 items-center text-center">
+                  <span className="text-left font-sans text-slate-400 font-medium">Freq.</span>
+                  {FREQUENCIES.map((f) => (
+                    <span key={f} className="text-slate-400">{f}</span>
+                  ))}
+                </div>
+                <div className="grid grid-cols-7 gap-1 items-center text-center bg-slate-900/80 p-1.5 rounded-lg border border-slate-800">
+                  <span className="text-left font-sans text-sky-400 font-semibold">R(f)</span>
+                  {FREQUENCIES.map((f) => (
+                    <span key={f} className="text-slate-200 font-bold">{inspectedMat.transmissionLoss[f]}dB</span>
+                  ))}
+                </div>
+                <div className="grid grid-cols-7 gap-1 items-center text-center bg-slate-900/80 p-1.5 rounded-lg border border-slate-800">
+                  <span className="text-left font-sans text-emerald-400 font-semibold">α(f)</span>
+                  {FREQUENCIES.map((f) => (
+                    <span key={f} className="text-emerald-300 font-bold">{inspectedMat.absorptionCoeff[f]}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* TEXTO EXPLICATIVO: POR QUE NÃO SE USA SEMPRE O PAINEL ABSORVENTE */}
+            <div className="bg-indigo-950/30 border border-indigo-800/60 p-3.5 rounded-xl space-y-2 text-xs text-indigo-100/90 leading-relaxed shadow-sm">
+              <div className="flex items-center gap-2 text-indigo-300 font-semibold border-b border-indigo-800/50 pb-1.5">
+                <Lightbulb className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Por que não se usa sempre o Painel Acústico Absorvente?</span>
+              </div>
+              <p className="text-[11px] text-slate-300">
+                Apesar de ser acusticamente o mais completo (combina elevado isolamento sonoro <strong className="text-sky-300">Rw = 34 dB</strong> com absorção fonoabsorvente classe A <strong className="text-emerald-300">αw = 0.90</strong> para anular reflexões), em engenharia prática e ambiental nem sempre é a escolha ótima devido a cinco condicionantes essenciais:
+              </p>
+
+              <div className="space-y-2 pt-1 text-[11px] text-slate-300">
+                <div className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
+                  <div>
+                    <strong className="text-slate-100">1. Colmatação de Poros & Perda Acústica:</strong> Em autoestradas e ambientes fabris, o tráfego liberta partículas de escape, fuligem e óleos que entopem as microperfurações e as fibras internas da lã mineral. Esse fenómeno (colmatação) anula a absorção acústica ao longo do tempo se não houver limpezas periódicas de custo elevado.
                   </div>
-                ))}
+                </div>
+
+                <div className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-400 mt-1.5 shrink-0" />
+                  <div>
+                    <strong className="text-slate-100">2. Vulnerabilidade a Vandalismo & Graffitis:</strong> A tinta de graffitis forma uma película estanque que sela instantaneamente os orifícios acústicos, destruindo irreversivelmente a absorção. O betão armado maciço, por oposição, suporta jatos de alta pressão e pintura anti-graffiti sem perder isolamento.
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-400 mt-1.5 shrink-0" />
+                  <div>
+                    <strong className="text-slate-100">3. Resistência Mecânica ao Choque:</strong> Em caso de despiste de viaturas pesadas, chapas metálicas perfuradas deformam-se e rasgam. Barreiras de betão maciço (ex.: perfil New Jersey) atuam em simultâneo como guarda de segurança rodoviária de contenção mecânica.
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                  <div>
+                    <strong className="text-slate-100">4. Impacto Visual e Perda de Luz Natural:</strong> O painel absorvente é 100% opaco e volumoso (~10 cm), criando sensação de "muralha". Em zonas habitacionais próximas, o <em>Acrílico Transparente (PMMA)</em> é preferível para manter a luz natural e a visibilidade das fachadas.
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5 shrink-0" />
+                  <div>
+                    <strong className="text-slate-100">5. Custo e Esforço de Vento:</strong> O fabrico multicamada (alumínio, lã de rocha e véu) e a manutenção encarecem a obra. Em viadutos, o peso e o arrasto ao vento exigem pilares e fundações mais dispendiosas do que estruturas mais leves.
+                  </div>
+                </div>
               </div>
             </div>
 
             <div className="bg-amber-950/20 border border-amber-900/40 p-2.5 rounded-xl flex gap-2 text-[11px] text-amber-300/90 leading-tight">
               <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
               <span>
-                Valores de ensaio indicativos para fins pedagógicos de Controlo e Prevenção Ambiental. O isolamento prático
-                in situ depende da vedação e ausência de fendas.
+                Valores de ensaio indicativos para fins pedagógicos de Controlo e Prevenção Ambiental (CPA).
               </span>
             </div>
           </div>
