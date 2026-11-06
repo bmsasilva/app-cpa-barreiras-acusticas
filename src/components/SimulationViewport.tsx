@@ -189,9 +189,9 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
   const shadowEndYM = Math.max(0, barrier.height + shadowSlope * (shadowEndXM - barrier.x));
   const shadowEndPx = { x: toPxX(shadowEndXM), y: toPxY(shadowEndYM) };
 
-  // Geometria da habitação pré-calculada
+  // Geometria do edifício residencial pré-calculada (Prédio de 2 Pisos: R/C + 1.º Andar)
   const houseLeftM = receiver.x - 0.5;
-  const houseWidthM = 4.5;
+  const houseWidthM = 5.2;
   const housePx = toPxX(houseLeftM);
   const houseWPx = toPxX(houseWidthM) - toPxX(0);
 
@@ -754,33 +754,194 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           </g>
         )}
 
-        {/* HABITAÇÃO / RECETOR */}
-        <g id="residentialReceiver">
+        {/* EDIFÍCIO RESIDENCIAL DE 2 PISOS (R/C + 1.º ANDAR) & RECETOR */}
+        <g id="residentialBuilding">
+          {/* Fachada Principal em Bloco Moderno (7.0m de altura total) */}
           <rect
             x={housePx}
-            y={toPxY(5.5)}
+            y={toPxY(6.9)}
             width={houseWPx}
-            height={groundYPx - toPxY(5.5)}
+            height={groundYPx - toPxY(6.9)}
             fill="#1e293b"
-            stroke="#475569"
+            stroke="#334155"
             strokeWidth="1.5"
             rx="3"
           />
-          <polygon
-            points={`
-              ${housePx - 8},${toPxY(5.5)}
-              ${housePx + houseWPx / 2},${toPxY(7.4)}
-              ${housePx + houseWPx + 8},${toPxY(5.5)}
-            `}
-            fill="#b91c1c"
-            stroke="#991b1b"
+
+          {/* Platibanda Superior de Cobertura com rufo metálico */}
+          <rect
+            x={housePx - 2}
+            y={toPxY(7.1)}
+            width={houseWPx + 4}
+            height={toPxY(6.9) - toPxY(7.1)}
+            fill="#0f172a"
+            stroke="#475569"
+            strokeWidth="1"
+            rx="1"
+          />
+          {/* Saída de ventilação / chaminé técnica no topo */}
+          <rect
+            x={housePx + houseWPx * 0.72}
+            y={toPxY(7.5)}
+            width="14"
+            height={toPxY(7.1) - toPxY(7.5)}
+            fill="#334155"
+            stroke="#475569"
+            strokeWidth="1"
+          />
+
+          {/* Friso Estrutural / Laje Maciça entre o R/C e o 1.º Andar (3.3m) */}
+          <rect
+            x={housePx}
+            y={toPxY(3.4)}
+            width={houseWPx}
+            height={toPxY(3.2) - toPxY(3.4)}
+            fill="#0f172a"
+            stroke="#334155"
+            strokeWidth="0.8"
+          />
+          <line
+            x1={housePx}
+            y1={toPxY(3.3)}
+            x2={housePx + houseWPx}
+            y2={toPxY(3.3)}
+            stroke="#64748b"
+            strokeWidth="1"
+            strokeDasharray="4 2"
+          />
+
+          {/* --- 1.º ANDAR (PISO 1: 3.3m a 6.9m) --- */}
+          {/* Janela Esquerda do 1.º Andar */}
+          <rect
+            x={housePx + 10}
+            y={toPxY(5.8)}
+            width="22"
+            height={toPxY(4.2) - toPxY(5.8)}
+            rx="2"
+            fill="#0284c7"
+            fillOpacity="0.2"
+            stroke="#38bdf8"
+            strokeWidth="1"
+          />
+          <line
+            x1={housePx + 21}
+            y1={toPxY(5.8)}
+            x2={housePx + 21}
+            y2={toPxY(4.2)}
+            stroke="#0284c7"
+            strokeWidth="1"
+          />
+
+          {/* Porta-Janela e Varanda Direita do 1.º Andar */}
+          <rect
+            x={housePx + houseWPx - 36}
+            y={toPxY(6.1)}
+            width="26"
+            height={toPxY(3.5) - toPxY(6.1)}
+            rx="2"
+            fill="#0284c7"
+            fillOpacity="0.25"
+            stroke="#38bdf8"
+            strokeWidth="1"
+          />
+          {/* Guarda da Varanda em Vidro/Inox */}
+          <rect
+            x={housePx + houseWPx - 38}
+            y={toPxY(4.5)}
+            width="30"
+            height={toPxY(3.4) - toPxY(4.5)}
+            rx="2"
+            fill="#38bdf8"
+            fillOpacity="0.15"
+            stroke="#7dd3fc"
+            strokeWidth="1.2"
+          />
+          <line
+            x1={housePx + houseWPx - 38}
+            y1={toPxY(4.5)}
+            x2={housePx + houseWPx - 8}
+            y2={toPxY(4.5)}
+            stroke="#bae6fd"
             strokeWidth="1.5"
           />
-          <rect x={housePx + houseWPx * 0.75} y={toPxY(7.0)} width="10" height={toPxY(5.5) - toPxY(7.0)} fill="#7f1d1d" />
 
-          {/* Badge de Impacto nos Moradores acima da Habitação */}
+          {/* Rótulo 1.º Andar */}
+          <text
+            x={housePx + 8}
+            y={toPxY(6.4)}
+            fill="#64748b"
+            fontSize="8"
+            fontWeight="bold"
+          >
+            1.º ANDAR
+          </text>
+
+          {/* --- RÉS-DO-CHÃO (PISO 0 / R/C: 0.0m a 3.3m) --- */}
+          {/* Porta de Entrada Principal do Prédio */}
+          <rect
+            x={housePx + 10}
+            y={toPxY(2.4)}
+            width="22"
+            height={groundYPx - toPxY(2.4)}
+            rx="2"
+            fill="#0f172a"
+            stroke="#475569"
+            strokeWidth="1.2"
+          />
+          {/* Vidro superior e puxador da porta */}
+          <rect
+            x={housePx + 13}
+            y={toPxY(2.2)}
+            width="16"
+            height="10"
+            rx="1"
+            fill="#38bdf8"
+            fillOpacity="0.3"
+          />
+          <line
+            x1={housePx + 28}
+            y1={toPxY(1.3)}
+            x2={housePx + 28}
+            y2={toPxY(0.9)}
+            stroke="#94a3b8"
+            strokeWidth="1.5"
+          />
+
+          {/* Janela do R/C (em linha com o recetor padrão a 1.5m) */}
+          <rect
+            x={housePx + houseWPx - 34}
+            y={toPxY(2.5)}
+            width="24"
+            height={toPxY(1.1) - toPxY(2.5)}
+            rx="2"
+            fill="#0284c7"
+            fillOpacity="0.2"
+            stroke="#38bdf8"
+            strokeWidth="1"
+          />
+          <line
+            x1={housePx + houseWPx - 22}
+            y1={toPxY(2.5)}
+            x2={housePx + houseWPx - 22}
+            y2={toPxY(1.1)}
+            stroke="#0284c7"
+            strokeWidth="1"
+          />
+
+          {/* Rótulo R/C */}
+          <text
+            x={housePx + 8}
+            y={toPxY(2.9)}
+            fill="#64748b"
+            fontSize="8"
+            fontWeight="bold"
+          >
+            R/C (PISO 0)
+          </text>
+
+          {/* Badge de Impacto nos Moradores acima da Cobertura */}
           {barrier.enabled && (
-            <g transform={`translate(${housePx + houseWPx / 2 - 50}, ${toPxY(8.4)})`}>
+            <g transform={`translate(${housePx + houseWPx / 2 - 50}, ${toPxY(7.9)})`}>
               <rect
                 x="0"
                 y="0"
@@ -811,14 +972,10 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
             </g>
           )}
 
-          <rect x={housePx + 10} y={toPxY(4.8)} width="16" height="18" rx="2" fill="#fef08a" opacity="0.8" />
-          <line x1={housePx + 18} y1={toPxY(4.8)} x2={housePx + 18} y2={toPxY(4.8) + 18} stroke="#713f12" strokeWidth="1" />
-          <rect x={housePx + houseWPx - 26} y={toPxY(4.8)} width="16" height="18" rx="2" fill="#fef08a" opacity="0.8" />
-          <rect x={housePx + 12} y={toPxY(1.8)} width="18" height={groundYPx - toPxY(1.8)} fill="#0f172a" stroke="#475569" />
-
+          {/* Haste/Mastro de Apoio do Microfone Recetor */}
           <line x1={recPx.x} y1={recPx.y} x2={recPx.x} y2={groundYPx} stroke="#64748b" strokeWidth="2.5" />
-          <line x1={recPx.x} y1={groundYPx} x2={recPx.x - 12} y2={groundYPx + 3} stroke="#475569" strokeWidth="2.5" />
-          <line x1={recPx.x} y1={groundYPx} x2={recPx.x + 12} y2={groundYPx + 3} stroke="#475569" strokeWidth="2.5" />
+          <line x1={recPx.x} y1={groundYPx} x2={recPx.x - 10} y2={groundYPx + 3} stroke="#475569" strokeWidth="2" />
+          <line x1={recPx.x} y1={groundYPx} x2={recPx.x + 10} y2={groundYPx + 3} stroke="#475569" strokeWidth="2" />
 
           <g
             className="cursor-move group"
