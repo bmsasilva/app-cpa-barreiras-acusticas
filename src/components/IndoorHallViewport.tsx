@@ -91,14 +91,13 @@ export const IndoorHallViewport: React.FC<IndoorHallViewportProps> = ({
 
   // Gerar posições dos Baffles no teto
   const bafflesList = React.useMemo(() => {
-    if (!hallState.bafflesEnabled || hallState.bafflesCount <= 0) return [];
-    const count = Math.min(60, hallState.bafflesCount);
+    const count = Math.min(40, Math.max(1, hallState.bafflesCount));
     const spacingPx = (ROOM_WIDTH_PX - 80) / (count + 1);
     return Array.from({ length: count }, (_, i) => ({
       x: ROOM_X_START + 40 + (i + 1) * spacingPx,
       y: ROOM_Y_CEILING + 28,
     }));
-  }, [hallState.bafflesEnabled, hallState.bafflesCount, ROOM_WIDTH_PX]);
+  }, [hallState.bafflesCount, ROOM_WIDTH_PX]);
 
   // Posições dos postos didáticos do slide
   const postoASvgX = scaleX(hallState.machineX + 2.0);
@@ -106,42 +105,42 @@ export const IndoorHallViewport: React.FC<IndoorHallViewportProps> = ({
 
   return (
     <div className="flex flex-col space-y-4">
-      {/* Viewport Principal SVG */}
+      {/* Viewport Principal SVG com dimensões estáveis */}
       <div className="relative w-full rounded-2xl border border-slate-800 bg-[#0b101b] shadow-2xl overflow-hidden select-none">
-        {/* Cabeçalho superior com título e controlos de Baffles */}
-        <div className="flex flex-wrap items-center justify-between px-5 py-3 border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-sm gap-3">
-          <div className="flex items-center gap-2.5">
+        {/* Cabeçalho superior com altura fixa e sem quebra de linha para estabilidade total */}
+        <div className="h-14 min-h-[56px] max-h-[56px] flex items-center justify-between px-4 border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-sm overflow-x-auto overflow-y-hidden flex-nowrap gap-3">
+          <div className="flex items-center gap-2.5 flex-shrink-0">
             <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-teal-500/20 text-teal-400 font-bold text-xs border border-teal-500/40">
               1
             </span>
-            <div>
-              <h2 className="text-sm font-bold tracking-wider text-teal-300 uppercase m-0 leading-tight">
+            <div className="flex flex-col">
+              <h2 className="text-sm font-bold tracking-wider text-teal-300 uppercase m-0 leading-tight whitespace-nowrap">
                 O que acontece na nave industrial
               </h2>
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[10px] text-slate-400 whitespace-nowrap">
                 Hopkins-Stryker (Campo Direto vs. Reverberado)
               </span>
             </div>
           </div>
 
-          {/* Controlos Superiores: Baffles e Atalhos */}
-          <div className="flex flex-wrap items-center gap-3 text-xs">
+          {/* Controlos Superiores com larguras fixas para não moverem a imagem */}
+          <div className="flex items-center gap-2 flex-shrink-0 text-xs">
             {/* Controlo de Baffles (Ligar/Desligar e Quantidade) */}
-            <div className="flex items-center gap-2 bg-slate-950/80 p-1 rounded-xl border border-slate-800">
-              {/* Botão Ligar/Desligar */}
+            <div className="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-slate-800 flex-shrink-0">
+              {/* Botão Ligar/Desligar com largura fixa rígida */}
               <button
                 onClick={() => onUpdateHallState({ bafflesEnabled: !hallState.bafflesEnabled })}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
+                className={`w-[136px] flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-colors shadow-sm ${
                   hallState.bafflesEnabled
                     ? 'bg-teal-600 hover:bg-teal-500 text-white shadow-teal-950'
                     : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
                 }`}
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>{hallState.bafflesEnabled ? 'Baffles: Ligados' : 'Baffles: Desligados'}</span>
+                <Sparkles className="w-3.5 h-3.5 flex-shrink-0" />
+                <span className="whitespace-nowrap">{hallState.bafflesEnabled ? 'Baffles: Ligados' : 'Baffles: Desligados'}</span>
               </button>
 
-              {/* Ajuste da quantidade de Baffles */}
+              {/* Ajuste da quantidade de Baffles com dimensões fixas */}
               <div
                 className={`flex items-center gap-1 pl-1 transition-opacity ${
                   hallState.bafflesEnabled ? 'opacity-100' : 'opacity-40 pointer-events-none'
@@ -150,50 +149,32 @@ export const IndoorHallViewport: React.FC<IndoorHallViewportProps> = ({
                 <button
                   onClick={() => onUpdateHallState({ bafflesCount: Math.max(2, hallState.bafflesCount - 2) })}
                   disabled={!hallState.bafflesEnabled || hallState.bafflesCount <= 2}
-                  className="p-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 transition-colors"
+                  className="w-6 h-6 flex items-center justify-center rounded bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 transition-colors"
                   title="Diminuir Baffles (-2)"
                 >
                   <Minus className="w-3.5 h-3.5" />
                 </button>
 
-                <span className="px-2 py-0.5 font-mono font-bold text-teal-300 text-xs min-w-[50px] text-center">
+                <span className="w-12 font-mono font-bold text-teal-300 text-xs text-center whitespace-nowrap">
                   {hallState.bafflesCount} un.
                 </span>
 
                 <button
                   onClick={() => onUpdateHallState({ bafflesCount: Math.min(40, hallState.bafflesCount + 2) })}
                   disabled={!hallState.bafflesEnabled || hallState.bafflesCount >= 40}
-                  className="p-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 transition-colors"
+                  className="w-6 h-6 flex items-center justify-center rounded bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 transition-colors"
                   title="Aumentar Baffles (+2)"
                 >
                   <Plus className="w-3.5 h-3.5" />
                 </button>
-
-                {/* Botões de quantidade rápida */}
-                <div className="hidden sm:flex items-center gap-1 border-l border-slate-800 ml-1.5 pl-1.5">
-                  {[10, 20, 30, 40].map((count) => (
-                    <button
-                      key={count}
-                      onClick={() => onUpdateHallState({ bafflesCount: count })}
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono transition-all ${
-                        hallState.bafflesCount === count
-                          ? 'bg-teal-500/20 text-teal-300 font-bold border border-teal-500/40'
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                      }`}
-                    >
-                      {count}
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
 
             {/* Atalhos para Posto A (2m) e Posto B (6m) */}
-            <div className="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-slate-800">
-              <span className="text-slate-400 font-medium px-1 hidden md:inline text-[11px]">Slide:</span>
+            <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 flex-shrink-0">
               <button
                 onClick={() => onUpdateHallState({ operatorDistanceM: 2.0 })}
-                className={`px-2.5 py-1 rounded-lg border font-mono transition-all ${
+                className={`px-2.5 py-1.5 rounded-lg border font-mono text-xs whitespace-nowrap transition-all ${
                   Math.abs(operatorDistanceM - 2.0) < 0.2
                     ? 'bg-amber-500/20 text-amber-300 border-amber-500/60 shadow-sm font-bold'
                     : 'bg-slate-800/80 text-slate-300 border-slate-700/60 hover:bg-slate-700'
@@ -203,7 +184,7 @@ export const IndoorHallViewport: React.FC<IndoorHallViewportProps> = ({
               </button>
               <button
                 onClick={() => onUpdateHallState({ operatorDistanceM: 6.0 })}
-                className={`px-2.5 py-1 rounded-lg border font-mono transition-all ${
+                className={`px-2.5 py-1.5 rounded-lg border font-mono text-xs whitespace-nowrap transition-all ${
                   Math.abs(operatorDistanceM - 6.0) < 0.2
                     ? 'bg-amber-500/20 text-amber-300 border-amber-500/60 shadow-sm font-bold'
                     : 'bg-slate-800/80 text-slate-300 border-slate-700/60 hover:bg-slate-700'
@@ -327,49 +308,47 @@ export const IndoorHallViewport: React.FC<IndoorHallViewportProps> = ({
           </text>
 
           {/* BAFFLES ABSORVENTES NO TETO */}
-          {hallState.bafflesEnabled && (
-            <g>
-              <text
-                x={SVG_WIDTH / 2}
-                y={ROOM_Y_CEILING - 12}
-                fill="#2dd4bf"
-                fontSize="12"
-                fontFamily="sans-serif"
-                fontWeight="600"
-                textAnchor="middle"
-              >
-                Baffles absorventes ({hallState.bafflesCount} unidades suspensas)
-              </text>
+          <g opacity={hallState.bafflesEnabled ? 1 : 0} style={{ transition: 'opacity 0.2s ease-in-out' }}>
+            <text
+              x={SVG_WIDTH / 2}
+              y={ROOM_Y_CEILING - 12}
+              fill="#2dd4bf"
+              fontSize="12"
+              fontFamily="sans-serif"
+              fontWeight="600"
+              textAnchor="middle"
+            >
+              Baffles absorventes ({hallState.bafflesCount} unidades suspensas)
+            </text>
 
-              {bafflesList.map((baffle, idx) => (
-                <g key={`baffle-${idx}`}>
-                  {/* Tirante de fixação ao teto */}
-                  <line
-                    x1={baffle.x}
-                    y1={ROOM_Y_CEILING}
-                    x2={baffle.x}
-                    y2={baffle.y}
-                    stroke="#2dd4bf"
-                    strokeWidth="1.5"
-                    strokeDasharray="2,2"
-                    opacity="0.8"
-                  />
-                  {/* Painel do Baffle */}
-                  <rect
-                    x={baffle.x - 12}
-                    y={baffle.y}
-                    width="24"
-                    height="8"
-                    rx="2"
-                    fill="url(#baffleGrad)"
-                    stroke="#5eead4"
-                    strokeWidth="1"
-                    filter="drop-shadow(0px 2px 4px rgba(45, 212, 191, 0.3))"
-                  />
-                </g>
-              ))}
-            </g>
-          )}
+            {bafflesList.map((baffle, idx) => (
+              <g key={`baffle-${idx}`}>
+                {/* Tirante de fixação ao teto */}
+                <line
+                  x1={baffle.x}
+                  y1={ROOM_Y_CEILING}
+                  x2={baffle.x}
+                  y2={baffle.y}
+                  stroke="#2dd4bf"
+                  strokeWidth="1.5"
+                  strokeDasharray="2,2"
+                  opacity="0.8"
+                />
+                {/* Painel do Baffle */}
+                <rect
+                  x={baffle.x - 12}
+                  y={baffle.y}
+                  width="24"
+                  height="8"
+                  rx="2"
+                  fill="url(#baffleGrad)"
+                  stroke="#5eead4"
+                  strokeWidth="1"
+                  filter="drop-shadow(0px 2px 4px rgba(45, 212, 191, 0.3))"
+                />
+              </g>
+            ))}
+          </g>
 
           {/* DISTÂNCIA CRÍTICA (Linha tracejada laranja vertical) */}
           <g>
@@ -749,53 +728,54 @@ export const IndoorHallViewport: React.FC<IndoorHallViewportProps> = ({
           </g>
         </svg>
 
-        {/* Rodapé Interno com Análise Didática Instantânea */}
-        <div className="bg-slate-950 border-t border-slate-800 p-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-          <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
-            <span className="text-slate-400 font-medium block mb-1">Comparação Slide (Posto A vs B):</span>
+        {/* Rodapé Interno com Análise Didática Instantânea com altura estável */}
+        <div className="bg-slate-950 border-t border-slate-800 p-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 h-[76px] flex flex-col justify-between">
+            <span className="text-slate-400 font-medium block">Comparação Slide (Posto A vs B):</span>
             <div className="flex items-center justify-between text-slate-200">
               <span>Posto A (2 m): <strong className="text-amber-400 font-mono">{result.levelAt2m} dB</strong></span>
               <span>Posto B (6 m): <strong className="text-amber-400 font-mono">{result.levelAt6m} dB</strong></span>
             </div>
-            <div className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+            <div className="text-[11px] text-slate-400 flex items-center gap-1">
               <span>Diferença:</span>
               <strong className="text-sky-400 font-mono">Δ = {result.diffPostoABDb} dB</strong>
-              <span className="text-[10px] text-slate-400">(Em campo livre seriam 9.5 dB!)</span>
+              <span className="text-[10px] text-slate-400">(Em campo livre: 9.5 dB)</span>
             </div>
           </div>
 
-          <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
-            <span className="text-slate-400 font-medium block mb-1">Efeito dos Baffles no Teto:</span>
+          <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 h-[76px] flex flex-col justify-between">
+            <span className="text-slate-400 font-medium block">Efeito dos Baffles no Teto:</span>
             <div className="flex items-center justify-between">
               <span className="text-slate-300">
-                Estado: {hallState.bafflesEnabled ? (
+                Estado:{' '}
+                {hallState.bafflesEnabled ? (
                   <strong className="text-teal-400">Ativados ({hallState.bafflesCount} un.)</strong>
                 ) : (
-                  <strong className="text-rose-400">Desativados (Sala Nua)</strong>
+                  <strong className="text-rose-400">Desativados</strong>
                 )}
               </span>
               <span className="text-teal-400 font-mono font-bold text-sm">
                 {result.baffleNoiseReductionDb > 0 ? `-${result.baffleNoiseReductionDb} dB` : '0.0 dB'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1 m-0">
+            <p className="text-[11px] text-slate-400 m-0 truncate">
               {hallState.bafflesEnabled
-                ? `A constante de sala subiu para R = ${result.roomConstantR} m², atenuando o som reverberado.`
-                : 'Superfícies rígidas (α = 0.05) refletem todo o som de volta ao operador.'}
+                ? `Constante de sala R = ${result.roomConstantR} m² (absorção ativa)`
+                : 'Superfícies rígidas (α = 0.05) refletem todo o som'}
             </p>
           </div>
 
-          <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 flex flex-col justify-between">
-            <span className="text-slate-400 font-medium block mb-1">Distância Crítica (rc):</span>
+          <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 h-[76px] flex flex-col justify-between">
+            <span className="text-slate-400 font-medium block">Distância Crítica (rc):</span>
             <div className="flex items-center justify-between">
               <span className="text-slate-300">rc calculado:</span>
               <strong className="text-amber-400 font-mono text-sm">{result.criticalDistanceRc} m</strong>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1 m-0">
-              Operador a <strong>{operatorDistanceM} m</strong> está no{' '}
+            <p className="text-[11px] text-slate-400 m-0 truncate">
+              Operador a <strong>{operatorDistanceM} m</strong> no{' '}
               <strong className={result.isOperatorInReverberantField ? 'text-sky-400' : 'text-amber-400'}>
                 {result.isOperatorInReverberantField ? 'Campo Reverberado' : 'Campo Direto'}
-              </strong>.
+              </strong>
             </p>
           </div>
         </div>
