@@ -16,16 +16,13 @@ import { IndoorHallViewport } from './components/IndoorHallViewport';
 import { ControlPanel } from './components/ControlPanel';
 import { ResultsDashboard } from './components/ResultsDashboard';
 import { SolutionsComparison } from './components/SolutionsComparison';
-import { EducationalChallenges } from './components/EducationalChallenges';
 import { AcousticMethodologyModal } from './components/AcousticMethodologyModal';
-import type { Challenge } from './educational/challenges';
 import {
   BarChart3,
   BookOpen,
   Building2,
   Columns,
   Download,
-  GraduationCap,
   Layers,
   RotateCcw,
   Warehouse,
@@ -91,7 +88,7 @@ export function App() {
   // Estado para Nave Industrial (Sala Fechada)
   const [indoorState, setIndoorState] = useState<IndoorHallState>(INITIAL_INDOOR_STATE);
 
-  const [activeBottomTab, setActiveBottomTab] = useState<'results' | 'challenges' | 'comparison'>('results');
+  const [activeBottomTab, setActiveBottomTab] = useState<'results' | 'comparison'>('results');
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
 
   // 3 Slots de Soluções Guardadas
@@ -155,13 +152,6 @@ export function App() {
 
   const handleClearSolution = (id: 'A' | 'B' | 'C') => {
     setSavedSolutions((prev) => prev.filter((s) => s.id !== id));
-  };
-
-  // Aplicar Cenário de um Desafio Didático
-  const handleApplyChallengeSetup = (challenge: Challenge) => {
-    setSource({ ...challenge.initialSetup.source });
-    setBarrier({ ...challenge.initialSetup.barrier });
-    setReceiver({ ...challenge.initialSetup.receiver });
   };
 
   // Exportar Relatório Técnico em PDF
@@ -484,18 +474,6 @@ export function App() {
                   </button>
 
                   <button
-                    onClick={() => setActiveBottomTab('challenges')}
-                    className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
-                      activeBottomTab === 'challenges'
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    <GraduationCap className="w-4 h-4" />
-                    <span>Modo Didático (5 Desafios)</span>
-                  </button>
-
-                  <button
                     onClick={() => setActiveBottomTab('comparison')}
                     className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
                       activeBottomTab === 'comparison'
@@ -515,16 +493,6 @@ export function App() {
                   barrier={barrier}
                   receiver={receiver}
                   result={result}
-                />
-              )}
-
-              {activeBottomTab === 'challenges' && (
-                <EducationalChallenges
-                  source={source}
-                  barrier={barrier}
-                  receiver={receiver}
-                  result={result}
-                  onApplyChallengeSetup={handleApplyChallengeSetup}
                 />
               )}
 

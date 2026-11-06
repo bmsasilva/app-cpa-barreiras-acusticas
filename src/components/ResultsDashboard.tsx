@@ -15,11 +15,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import {
-  BarChart3,
-  TrendingDown,
-  Users,
-} from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 
 interface ResultsDashboardProps {
   source: SimulationSource;
@@ -30,7 +26,7 @@ interface ResultsDashboardProps {
 
 export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
   source: _source,
-  barrier,
+  barrier: _barrier,
   receiver: _receiver,
   result,
 }) => {
@@ -51,54 +47,6 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* CARTÕES DE MÉTRICAS PRINCIPAIS: Redução Sonora, Desagrado Moradores e Custo */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {/* Redução Sonora Efetiva */}
-        <div className="bg-gradient-to-br from-emerald-950/50 to-slate-900 border border-emerald-800/60 p-3.5 rounded-xl shadow-md">
-          <div className="text-xs text-emerald-400 font-semibold flex items-center justify-between">
-            <span>Redução Sonora Efetiva (ΔL)</span>
-            <TrendingDown className="w-4 h-4 text-emerald-400" />
-          </div>
-          <div className="font-mono text-2xl font-bold text-emerald-400 mt-1">
-            {result.netReduction > 0 ? `-${result.netReduction.toFixed(1)}` : '0.0'}{' '}
-            <span className="text-xs text-emerald-500 font-sans">dB</span>
-          </div>
-          <div className="text-[11px] text-emerald-500/90 mt-0.5">
-            {result.netReductionA > 0 ? `-${result.netReductionA.toFixed(1)}` : '0.0'} dB(A) global
-          </div>
-        </div>
-
-        {/* Desagrado dos Moradores */}
-        <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-3.5 rounded-xl shadow-md">
-          <div className="text-xs font-semibold flex items-center justify-between" style={{ color: result.residentAnnoyance.color }}>
-            <span>Desagrado dos Moradores</span>
-            <Users className="w-4 h-4" />
-          </div>
-          <div className="font-mono text-2xl font-bold mt-1" style={{ color: result.residentAnnoyance.color }}>
-            {result.residentAnnoyance.score}%{' '}
-            <span className="text-xs font-sans opacity-80">({result.residentAnnoyance.label})</span>
-          </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">
-            Oclusão: {result.residentAnnoyance.occlusionAngleDeg}° • Distância: {result.residentAnnoyance.distanceToFacadeM}m
-          </div>
-        </div>
-
-        {/* Custo Estimado */}
-        <div className="bg-gradient-to-br from-amber-950/40 to-slate-900 border border-amber-800/60 p-3.5 rounded-xl shadow-md">
-          <div className="text-xs text-amber-400 font-semibold flex items-center justify-between">
-            <span>Custo Estimado</span>
-            <span className="text-[11px] text-amber-500/90 font-mono">{result.totalAreaM2} m²</span>
-          </div>
-          <div className="font-mono text-2xl font-bold text-amber-300 mt-1">
-            {result.totalCostEuro.toLocaleString('pt-PT')}{' '}
-            <span className="text-xs text-amber-500 font-sans">€</span>
-          </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">
-            {result.totalAreaM2} m² totais ({barrier.height.toFixed(1)}m × {barrier.lengthM}m)
-          </div>
-        </div>
-      </div>
-
       {/* GRÁFICO ACÚSTICO DE NÍVEIS SONOROS */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-slate-800 pb-3">
