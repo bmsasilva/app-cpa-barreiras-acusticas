@@ -136,6 +136,7 @@ export interface AcousticCalculationResult {
   // Métricas económicas
   totalAreaM2: number;
   totalCostEuro: number;
+  costEffectivenessEuroPerDb: number | null; // Custo-eficácia (€/dB de atenuação acústica)
 
   // Impacto visual e aceitação social dos moradores
   residentAnnoyance: ResidentAnnoyance;

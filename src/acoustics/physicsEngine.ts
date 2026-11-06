@@ -371,6 +371,13 @@ export function calculateAcoustics(
   // Cálculo da desagradabilidade visual / aceitação social dos moradores
   const residentAnnoyance = calculateResidentAnnoyance(barrier, receiver, barrier.materialId);
 
+  const netReductionRound = Number(netReduction.toFixed(1));
+  const roundedCost = Math.round(totalCostEuro);
+  const costEffectivenessEuroPerDb =
+    barrierIsActive && netReductionRound > 0.05
+      ? Math.round(roundedCost / netReductionRound)
+      : null;
+
   return {
     sourceType: sType,
     d0: Number(d0.toFixed(2)),
@@ -388,7 +395,7 @@ export function calculateAcoustics(
     levelDiffracted: Number(levelDiffracted.toFixed(1)),
     levelTransmitted: Number(levelTransmitted.toFixed(1)),
     levelWithBarrier: Number(levelWithBarrier.toFixed(1)),
-    netReduction: Number(netReduction.toFixed(1)),
+    netReduction: netReductionRound,
 
     levelFreeFieldA: Number(levelFreeFieldA.toFixed(1)),
     levelWithBarrierA: Number(levelWithBarrierA.toFixed(1)),
@@ -396,7 +403,8 @@ export function calculateAcoustics(
 
     spectrum,
     totalAreaM2: Number(totalAreaM2.toFixed(1)),
-    totalCostEuro: Math.round(totalCostEuro),
+    totalCostEuro: roundedCost,
+    costEffectivenessEuroPerDb,
     residentAnnoyance,
 
     effectiveThicknessM: Number(thicknessM.toFixed(3)),

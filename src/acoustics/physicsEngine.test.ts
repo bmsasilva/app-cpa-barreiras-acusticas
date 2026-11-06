@@ -240,6 +240,21 @@ describe('Motor Acústico - Testes Unitários de Física', () => {
     expect(resBetao.netReduction).toBeGreaterThan(resChapa.netReduction);
   });
 
+  it('deve calcular corretamente o indicador de custo-eficácia em €/dB', () => {
+    const source: SimulationSource = { x: 0, height: 1.5, soundPowerLevel: 90, frequency: 1000 };
+    const receiver: SimulationReceiver = { x: 30, height: 1.5 };
+    const barrier: SimulationBarrier = { enabled: true, x: 10, height: 3.0, thickness: 0.15, materialId: 'betao', lengthM: 20 };
+
+    const res = calculateAcoustics(source, barrier, receiver);
+    expect(res.costEffectivenessEuroPerDb).not.toBeNull();
+    const expected = Math.round(res.totalCostEuro / res.netReduction);
+    expect(res.costEffectivenessEuroPerDb).toBe(expected);
+
+    // Quando a barreira está desativada
+    const resDisabled = calculateAcoustics(source, { ...barrier, enabled: false }, receiver);
+    expect(resDisabled.costEffectivenessEuroPerDb).toBeNull();
+  });
+
   describe('Nave Industrial (Acústica de Salas - Modelo Hopkins-Stryker / Sabine)', () => {
     const baseHallState: IndoorHallState = {
       roomLengthM: 10, // Máximo 10m para ampliação da visualização

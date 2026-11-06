@@ -283,6 +283,9 @@ export function App() {
     doc.text(`- Perda por Transmissão Efetiva (R): ${result.materialTransmissionLoss} dB (Lei da Massa)`, 16, 126);
     doc.text(`- Desagrado dos Moradores (Impacto Visual): ${result.residentAnnoyance.score}% (${result.residentAnnoyance.label} | Distância Fachada: ${result.residentAnnoyance.distanceToFacadeM}m)`, 16, 132);
     doc.text(`- Custo Fictício Estimado: ${result.totalCostEuro} € (Área: ${result.totalAreaM2} m²)`, 16, 138);
+    if (result.costEffectivenessEuroPerDb !== null) {
+      doc.text(`- Custo-Eficácia: ${result.costEffectivenessEuroPerDb} €/dB`, 16, 144);
+    }
 
     doc.setFontSize(9);
     doc.setTextColor(100, 116, 139);
@@ -437,8 +440,19 @@ export function App() {
                     </span>
                   </div>
 
-                  <div className="text-amber-400 font-medium">
-                    Custo: <strong className="font-mono">{result.totalCostEuro.toLocaleString('pt-PT')} €</strong>
+                  <div className="flex items-center gap-3">
+                    <div className="text-amber-400 font-medium">
+                      Custo Total: <strong className="font-mono text-amber-300">{result.totalCostEuro.toLocaleString('pt-PT')} €</strong>
+                    </div>
+
+                    <div className="text-purple-300 font-medium border-l border-slate-800 pl-3 flex items-center gap-1.5">
+                      <span>Custo-Eficácia:</span>
+                      <strong className="font-mono text-purple-200">
+                        {result.costEffectivenessEuroPerDb !== null
+                          ? `${result.costEffectivenessEuroPerDb.toLocaleString('pt-PT')} €/dB`
+                          : '— €/dB'}
+                      </strong>
+                    </div>
                   </div>
                 </div>
               </div>

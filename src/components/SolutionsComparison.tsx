@@ -116,6 +116,7 @@ export const SolutionsComparison: React.FC<SolutionsComparisonProps> = ({
               <th className="py-2.5 px-3">Redução (ΔL)</th>
               <th className="py-2.5 px-3">Isolamento (R)</th>
               <th className="py-2.5 px-3">Custo Fictício</th>
+              <th className="py-2.5 px-3">Custo-Eficácia</th>
               <th className="py-2.5 px-3 text-right">Ações</th>
             </tr>
           </thead>
@@ -140,6 +141,11 @@ export const SolutionsComparison: React.FC<SolutionsComparisonProps> = ({
               <td className="py-2.5 px-3 font-mono text-amber-400">
                 {currentResult.totalCostEuro.toLocaleString('pt-PT')} €
               </td>
+              <td className="py-2.5 px-3 font-mono text-purple-300 font-semibold">
+                {currentResult.costEffectivenessEuroPerDb !== null
+                  ? `${currentResult.costEffectivenessEuroPerDb.toLocaleString('pt-PT')} €/dB`
+                  : '—'}
+              </td>
               <td className="py-2.5 px-3 text-right text-slate-400">Em edição</td>
             </tr>
 
@@ -149,7 +155,7 @@ export const SolutionsComparison: React.FC<SolutionsComparisonProps> = ({
                 return (
                   <tr key={slot} className="text-slate-500 italic">
                     <td className="py-2.5 px-3 font-bold text-slate-500">Slot {slot}</td>
-                    <td colSpan={7} className="py-2.5 px-3">
+                    <td colSpan={8} className="py-2.5 px-3">
                       Slot vazio. Clica em "Guardar como: Slot {slot}" para registar a solução atual.
                     </td>
                     <td className="py-2.5 px-3 text-right">-</td>
@@ -180,6 +186,11 @@ export const SolutionsComparison: React.FC<SolutionsComparisonProps> = ({
                   <td className="py-2.5 px-3 font-mono">{sol.result.materialTransmissionLoss} dB</td>
                   <td className="py-2.5 px-3 font-mono text-amber-400">
                     {sol.result.totalCostEuro.toLocaleString('pt-PT')} €
+                  </td>
+                  <td className="py-2.5 px-3 font-mono text-purple-300 font-semibold">
+                    {sol.result.costEffectivenessEuroPerDb !== null
+                      ? `${sol.result.costEffectivenessEuroPerDb.toLocaleString('pt-PT')} €/dB`
+                      : '—'}
                   </td>
                   <td className="py-2.5 px-3 text-right">
                     <div className="flex items-center justify-end gap-1.5">
@@ -286,6 +297,14 @@ export const SolutionsComparison: React.FC<SolutionsComparisonProps> = ({
                     {sol1Data.result.totalCostEuro.toLocaleString('pt-PT')} €
                   </span>
                 </div>
+                <div className="flex justify-between text-slate-300">
+                  <span>Custo-Eficácia:</span>
+                  <span className="font-mono font-bold text-purple-300">
+                    {sol1Data.result.costEffectivenessEuroPerDb !== null
+                      ? `${sol1Data.result.costEffectivenessEuroPerDb.toLocaleString('pt-PT')} €/dB`
+                      : '—'}
+                  </span>
+                </div>
               </div>
             ) : (
               <div className="text-slate-500 py-3 text-center">Nenhuma solução guardada neste slot.</div>
@@ -323,6 +342,14 @@ export const SolutionsComparison: React.FC<SolutionsComparisonProps> = ({
                   <span>Custo Total:</span>
                   <span className="font-mono font-bold text-amber-400">
                     {sol2Data.result.totalCostEuro.toLocaleString('pt-PT')} €
+                  </span>
+                </div>
+                <div className="flex justify-between text-slate-300">
+                  <span>Custo-Eficácia:</span>
+                  <span className="font-mono font-bold text-purple-300">
+                    {sol2Data.result.costEffectivenessEuroPerDb !== null
+                      ? `${sol2Data.result.costEffectivenessEuroPerDb.toLocaleString('pt-PT')} €/dB`
+                      : '—'}
                   </span>
                 </div>
               </div>
