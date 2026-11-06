@@ -64,7 +64,7 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 900, height: 460 });
   const [isPlaying, setIsPlaying] = useState(true);
-  const [waveSpeed, setWaveSpeed] = useState<number>(30); // 0 = estático, 100 = velocidade máx
+  const [waveSpeed, setWaveSpeed] = useState<number>(10); // 10% por defeito: calmo e suave
   const [animationPhase, setAnimationPhase] = useState(0);
   const [activeDrag, setActiveDrag] = useState<
     'barrier_pos' | 'barrier_height' | 'source_pos' | 'receiver_pos' | null
@@ -296,22 +296,6 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
             <Flame className="w-3.5 h-3.5" />
             <span>Mapa Sonoro</span>
           </button>
-
-          {toggles.showHeatmap && (
-            <select
-              value={toggles.heatmapMode}
-              onChange={(e) =>
-                onUpdateToggles({
-                  heatmapMode: e.target.value as ViewportToggles['heatmapMode'],
-                })
-              }
-              className="bg-slate-950 text-amber-300 text-[11px] rounded px-1.5 py-0.5 border border-amber-600/50 outline-none"
-            >
-              <option value="with_barrier">Com Barreira</option>
-              <option value="without_barrier">Sem Barreira</option>
-              <option value="difference">Atenuação ΔL (dB)</option>
-            </select>
-          )}
 
           <button
             onClick={onReset}

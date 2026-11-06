@@ -29,7 +29,7 @@ interface ResultsDashboardProps {
 
 export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
   source: _source,
-  barrier: _barrier,
+  barrier,
   receiver: _receiver,
   result,
 }) => {
@@ -50,67 +50,36 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* CARTÕES DE MÉTRICAS PRINCIPAIS (6 Cards) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-        <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-md">
-          <div className="text-[11px] text-slate-400 font-medium">Sem Barreira</div>
-          <div className="font-mono text-xl font-bold text-slate-100 mt-1">
-            {result.levelFreeField} <span className="text-xs text-slate-400 font-sans">dB</span>
+      {/* CARTÕES DE MÉTRICAS PRINCIPAIS: Apenas Redução Sonora Efetiva e Custo */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* Redução Sonora Efetiva */}
+        <div className="bg-gradient-to-br from-emerald-950/50 to-slate-900 border border-emerald-800/60 p-3.5 rounded-xl shadow-md">
+          <div className="text-xs text-emerald-400 font-semibold flex items-center justify-between">
+            <span>Redução Sonora Efetiva (ΔL)</span>
+            <TrendingDown className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">{result.levelFreeFieldA} dB(A) global</div>
-        </div>
-
-        <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-md">
-          <div className="text-[11px] text-emerald-400 font-medium">Com Barreira</div>
-          <div className="font-mono text-xl font-bold text-emerald-400 mt-1">
-            {result.levelWithBarrier} <span className="text-xs text-emerald-500 font-sans">dB</span>
-          </div>
-          <div className="text-[10px] text-emerald-600 mt-0.5">{result.levelWithBarrierA} dB(A) global</div>
-        </div>
-
-        <div className="bg-gradient-to-br from-sky-950/60 to-slate-900 border border-sky-800/60 p-3 rounded-xl shadow-md">
-          <div className="text-[11px] text-sky-400 font-medium flex items-center justify-between">
-            <span>Redução (ΔL)</span>
-            <TrendingDown className="w-3.5 h-3.5 text-sky-400" />
-          </div>
-          <div className="font-mono text-xl font-bold text-sky-400 mt-1">
+          <div className="font-mono text-2xl font-bold text-emerald-400 mt-1">
             {result.netReduction > 0 ? `-${result.netReduction.toFixed(1)}` : '0.0'}{' '}
-            <span className="text-xs text-sky-500 font-sans">dB</span>
+            <span className="text-xs text-emerald-500 font-sans">dB</span>
           </div>
-          <div className="text-[10px] text-sky-500/80 mt-0.5">
-            {result.netReductionA > 0 ? `-${result.netReductionA.toFixed(1)}` : '0.0'} dB(A)
-          </div>
-        </div>
-
-        <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-md">
-          <div className="text-[11px] text-indigo-400 font-medium">Difração Topo</div>
-          <div className="font-mono text-xl font-bold text-indigo-300 mt-1">
-            {result.diffractionAttenuation.toFixed(1)}{' '}
-            <span className="text-xs text-indigo-500 font-sans">dB</span>
-          </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">
-            {result.thicknessDiffractionBonusDb > 0 ? `+${result.thicknessDiffractionBonusDb} dB topo largo` : 'Maekawa / Kurze'}
+          <div className="text-[11px] text-emerald-500/90 mt-0.5">
+            {result.netReductionA > 0 ? `-${result.netReductionA.toFixed(1)}` : '0.0'} dB(A) global
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-md">
-          <div className="text-[11px] text-rose-400 font-medium">Isolamento (R)</div>
-          <div className="font-mono text-xl font-bold text-rose-300 mt-1">
-            {result.materialTransmissionLoss}{' '}
-            <span className="text-xs text-rose-500 font-sans">dB</span>
+        {/* Custo Estimado */}
+        <div className="bg-gradient-to-br from-amber-950/40 to-slate-900 border border-amber-800/60 p-3.5 rounded-xl shadow-md">
+          <div className="text-xs text-amber-400 font-semibold flex items-center justify-between">
+            <span>Custo Estimado</span>
+            <span className="text-[11px] text-amber-500/90 font-mono">{result.totalAreaM2} m²</span>
           </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">
-            {result.surfaceMassKgM2 ? `${result.surfaceMassKgM2} kg/m²` : 'Transmissão direta'}
-          </div>
-        </div>
-
-        <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-md">
-          <div className="text-[11px] text-amber-400 font-medium">Custo Estimado</div>
-          <div className="font-mono text-xl font-bold text-amber-300 mt-1">
+          <div className="font-mono text-2xl font-bold text-amber-300 mt-1">
             {result.totalCostEuro.toLocaleString('pt-PT')}{' '}
             <span className="text-xs text-amber-500 font-sans">€</span>
           </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">{result.totalAreaM2} m² totais</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">
+            Investimento total da barreira ({barrier.height.toFixed(1)}m alt. × {barrier.lengthM}m comp.)
+          </div>
         </div>
       </div>
 
