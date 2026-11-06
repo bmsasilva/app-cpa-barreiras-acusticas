@@ -231,9 +231,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   <div className="text-[11px] text-orange-400 font-medium mt-1">
                     Indústria / Fábrica
                   </div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">
-                    Divergência esférica (250 Hz)
-                  </div>
                 </button>
 
                 <button
@@ -251,9 +248,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   </div>
                   <div className="text-[11px] text-amber-400 font-medium mt-1">
                     Estrada / Tráfego
-                  </div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">
-                    Divergência cilíndrica (1000 Hz)
                   </div>
                 </button>
               </div>
