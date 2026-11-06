@@ -244,7 +244,7 @@ export function App() {
     doc.setFontSize(16);
     doc.text('Relatório Técnico de Simulação de Barreira Acústica', 14, 18);
     doc.setFontSize(10);
-    doc.text('Controlo e Prevenção Ambiental (CPA) — Simulação Didática', 14, 25);
+    doc.text('Controlo e Prevenção Ambiental (CPA) — Simulação de Barreiras Acústicas', 14, 25);
 
     doc.setTextColor(30, 41, 59);
     doc.setFontSize(13);
@@ -518,7 +518,7 @@ export function App() {
           Simulador Visual Interativo de Barreiras Acústicas · Controlo e Prevenção Ambiental
         </p>
         <p className="text-[11px] text-slate-600">
-          Formulação Maekawa / Kurze-Anderson (1971) · Ponderação A (IEC 61672) · Modelo Didático 2D para Engenharia Ambiental
+          Formulação Maekawa / Kurze-Anderson (1971) · Ponderação A (IEC 61672) · Simulação 2D para Engenharia Ambiental
         </p>
       </footer>
 
