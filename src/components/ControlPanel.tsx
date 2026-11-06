@@ -325,44 +325,28 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           <div className="space-y-4">
             <div className="space-y-1.5 bg-slate-950/50 p-3 rounded-xl border border-slate-800">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-medium text-slate-200">Posição da Habitação (Distância X)</span>
-                <span className="font-bold text-emerald-400 font-mono text-sm">{receiver.x.toFixed(1)} m</span>
-              </div>
-              <input
-                type="range"
-                min={Math.max(10, barrier.x + 1.5)}
-                max="34.5"
-                step="0.5"
-                value={receiver.x}
-                onChange={(e) => onUpdateReceiver({ x: parseFloat(e.target.value) })}
-                className="w-full accent-emerald-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
-              />
-              <div className="flex justify-between text-[10px] text-slate-500">
-                <span>{(Math.max(10, barrier.x + 1.5)).toFixed(1)} m</span>
-                <span>30.0 m (padrão)</span>
-                <span>34.5 m</span>
-              </div>
-            </div>
-
-            <div className="space-y-1.5 bg-slate-950/50 p-3 rounded-xl border border-slate-800">
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-medium text-slate-200">Altura do Ponto de Avaliação (Microfone)</span>
+                <span className="font-medium text-slate-200">Altura do Recetor (Microfone na Fachada)</span>
                 <span className="font-bold text-emerald-400 font-mono text-sm">{receiver.height.toFixed(1)} m</span>
               </div>
               <input
                 type="range"
                 min="1.0"
-                max="8.0"
+                max="6.5"
                 step="0.1"
                 value={receiver.height}
                 onChange={(e) => onUpdateReceiver({ height: parseFloat(e.target.value) })}
                 className="w-full accent-emerald-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
               />
               <div className="flex justify-between text-[10px] text-slate-500">
-                <span>1.0 m (jardim/térreo)</span>
-                <span>4.0 m (1º andar)</span>
-                <span>8.0 m (cobertura)</span>
+                <span>1.0 m (R/C)</span>
+                <span>1.5 m (Padrão)</span>
+                <span>4.5 m (1.º Andar)</span>
               </div>
+            </div>
+
+            <div className="bg-slate-950/40 p-3 rounded-xl border border-slate-800 text-xs text-slate-400 space-y-1">
+              <div className="font-semibold text-slate-300">Posição da Habitação:</div>
+              <div>Fixa a <strong>{receiver.x.toFixed(1)} m</strong> da fonte sonora (ajuste apenas vertical).</div>
             </div>
 
             <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">

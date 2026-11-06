@@ -142,13 +142,13 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
       const clampedX = Math.max(minX, Math.min(maxX, Number(mX.toFixed(2))));
       onUpdateBarrier({ x: clampedX, enabled: true });
     } else if (activeDrag === 'source_pos') {
-      const clampedX = Math.max(0, Math.min(Math.min(5, barrier.x - 1.5), Number(mX.toFixed(2))));
+      // Deslocamento apenas vertical (bloqueado em X)
       const clampedH = Math.max(0.5, Math.min(5.0, Number(mY.toFixed(2))));
-      onUpdateSource({ x: clampedX, height: clampedH });
+      onUpdateSource({ height: clampedH });
     } else if (activeDrag === 'receiver_pos') {
-      const clampedX = Math.max(Math.max(15, barrier.x + 1.5), Math.min(34.5, Number(mX.toFixed(2))));
-      const clampedH = Math.max(1.0, Math.min(8.0, Number(mY.toFixed(2))));
-      onUpdateReceiver({ x: clampedX, height: clampedH });
+      // Deslocamento apenas vertical (bloqueado em X)
+      const clampedH = Math.max(1.0, Math.min(6.5, Number(mY.toFixed(2))));
+      onUpdateReceiver({ height: clampedH });
     }
   };
 
@@ -668,9 +668,9 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
               {source.soundPowerLevel} dB @ {source.frequency}Hz
             </text>
 
-            {/* Pega Interativa da Fonte Sonora */}
+            {/* Pega Interativa da Fonte Sonora (Ajuste Vertical de Altura) */}
             <g
-              className="cursor-move group"
+              className="cursor-ns-resize group"
               onPointerDown={(e) => handlePointerDown('source_pos', e)}
             >
               <circle
@@ -731,7 +731,7 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
             </text>
 
             <g
-              className="cursor-move group"
+              className="cursor-ns-resize group"
               onPointerDown={(e) => handlePointerDown('source_pos', e)}
             >
               <circle
@@ -813,56 +813,44 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           {/* --- 1.º ANDAR (PISO 1: 3.3m a 6.9m) --- */}
           {/* Janela Esquerda do 1.º Andar */}
           <rect
-            x={housePx + 10}
+            x={housePx + 12}
             y={toPxY(5.8)}
             width="22"
             height={toPxY(4.2) - toPxY(5.8)}
             rx="2"
             fill="#0284c7"
-            fillOpacity="0.2"
+            fillOpacity="0.25"
             stroke="#38bdf8"
-            strokeWidth="1"
+            strokeWidth="1.2"
           />
           <line
-            x1={housePx + 21}
+            x1={housePx + 23}
             y1={toPxY(5.8)}
-            x2={housePx + 21}
+            x2={housePx + 23}
             y2={toPxY(4.2)}
             stroke="#0284c7"
             strokeWidth="1"
           />
 
-          {/* Porta-Janela e Varanda Direita do 1.º Andar */}
+          {/* Janela Direita do 1.º Andar */}
           <rect
-            x={housePx + houseWPx - 36}
-            y={toPxY(6.1)}
-            width="26"
-            height={toPxY(3.5) - toPxY(6.1)}
+            x={housePx + houseWPx - 34}
+            y={toPxY(5.8)}
+            width="22"
+            height={toPxY(4.2) - toPxY(5.8)}
             rx="2"
             fill="#0284c7"
             fillOpacity="0.25"
             stroke="#38bdf8"
-            strokeWidth="1"
-          />
-          {/* Guarda da Varanda em Vidro/Inox */}
-          <rect
-            x={housePx + houseWPx - 38}
-            y={toPxY(4.5)}
-            width="30"
-            height={toPxY(3.4) - toPxY(4.5)}
-            rx="2"
-            fill="#38bdf8"
-            fillOpacity="0.15"
-            stroke="#7dd3fc"
             strokeWidth="1.2"
           />
           <line
-            x1={housePx + houseWPx - 38}
-            y1={toPxY(4.5)}
-            x2={housePx + houseWPx - 8}
-            y2={toPxY(4.5)}
-            stroke="#bae6fd"
-            strokeWidth="1.5"
+            x1={housePx + houseWPx - 23}
+            y1={toPxY(5.8)}
+            x2={housePx + houseWPx - 23}
+            y2={toPxY(4.2)}
+            stroke="#0284c7"
+            strokeWidth="1"
           />
 
           {/* Rótulo 1.º Andar */}
@@ -978,7 +966,7 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           <line x1={recPx.x} y1={groundYPx} x2={recPx.x + 10} y2={groundYPx + 3} stroke="#475569" strokeWidth="2" />
 
           <g
-            className="cursor-move group"
+            className="cursor-ns-resize group"
             onPointerDown={(e) => handlePointerDown('receiver_pos', e)}
           >
             <circle cx={recPx.x} cy={recPx.y} r="14" fill="#10b981" fillOpacity="0.25" className="animate-pulse" />
