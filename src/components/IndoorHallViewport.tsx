@@ -70,7 +70,8 @@ export const IndoorHallViewport: React.FC<IndoorHallViewportProps> = ({
       const clientX = e.clientX - rect.left;
       const svgX = (clientX / rect.width) * SVG_WIDTH;
       const xMeters = invScaleX(svgX);
-      const newDistance = Math.max(0.5, Math.min(hallState.roomLengthM - hallState.machineX - 1, xMeters - hallState.machineX));
+      const maxDist = Math.max(0.5, Number((hallState.roomLengthM - hallState.machineX - 0.6).toFixed(1)));
+      const newDistance = Math.max(0.5, Math.min(maxDist, xMeters - hallState.machineX));
       onUpdateHallState({ operatorDistanceM: Number(newDistance.toFixed(1)) });
     };
 
@@ -256,7 +257,7 @@ export const IndoorHallViewport: React.FC<IndoorHallViewportProps> = ({
             fontFamily="sans-serif"
             fontWeight="500"
           >
-            Nave Industrial (Superfícies rígidas: Betão e Chapa de Aço)
+            Nave Industrial (Comprimento: {hallState.roomLengthM} m · Superfícies rígidas: Betão e Chapa de Aço)
           </text>
 
           {/* BAFFLES ABSORVENTES NO TETO */}
@@ -787,8 +788,8 @@ export const IndoorHallViewport: React.FC<IndoorHallViewportProps> = ({
               <input
                 type="range"
                 min="0"
-                max="80"
-                step="5"
+                max="40"
+                step="2"
                 value={hallState.bafflesCount}
                 disabled={!hallState.bafflesEnabled}
                 onChange={(e) => onUpdateHallState({ bafflesCount: Number(e.target.value) })}
@@ -796,9 +797,9 @@ export const IndoorHallViewport: React.FC<IndoorHallViewportProps> = ({
               />
               <div className="flex justify-between text-[10px] text-slate-400">
                 <span>0 un. (Nenhum)</span>
-                <span>30 un. (Moderado)</span>
-                <span>60 un. (Tratamento Completo)</span>
-                <span>80 un.</span>
+                <span>10 un. (Ligeiro)</span>
+                <span>20 un. (Recomendado)</span>
+                <span>40 un. (Intensivo)</span>
               </div>
             </div>
 
@@ -810,18 +811,18 @@ export const IndoorHallViewport: React.FC<IndoorHallViewportProps> = ({
               </div>
               <input
                 type="range"
-                min="1.0"
-                max="18.0"
-                step="0.5"
+                min="0.5"
+                max={Math.max(1, Number((hallState.roomLengthM - hallState.machineX - 0.6).toFixed(1)))}
+                step="0.25"
                 value={hallState.operatorDistanceM}
                 onChange={(e) => onUpdateHallState({ operatorDistanceM: Number(e.target.value) })}
                 className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
               />
               <div className="flex justify-between text-[10px] text-slate-400">
-                <span>1.0 m (Campo Direto)</span>
+                <span>0.5 m (Muito Próximo)</span>
                 <span>2.0 m (Posto A)</span>
                 <span>6.0 m (Posto B)</span>
-                <span>18.0 m (Fundo da Sala)</span>
+                <span>8.0 m (Fundo da Sala)</span>
               </div>
             </div>
 

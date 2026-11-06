@@ -68,15 +68,15 @@ const INITIAL_TOGGLES: ViewportToggles = {
 };
 
 const INITIAL_INDOOR_STATE: IndoorHallState = {
-  roomLengthM: 24,
-  roomWidthM: 15,
-  roomHeightM: 6.5,
+  roomLengthM: 10, // Máximo 10 m para ampliar distâncias visuais no ecrã
+  roomWidthM: 8,
+  roomHeightM: 5.0,
   wallAlpha: 0.05,
   bafflesEnabled: false,
-  bafflesCount: 40,
+  bafflesCount: 20,
   baffleUnitAbsorptionM2: 1.5,
   machineSoundPowerLw: 98,
-  machineX: 2.0,
+  machineX: 1.0,
   machineDirectivityQ: 2,
   operatorDistanceM: 2.0,
 };
