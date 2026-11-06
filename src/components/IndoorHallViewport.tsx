@@ -2,9 +2,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import type { IndoorAcousticResult, IndoorHallState } from '../acoustics/types';
 import {
   Sparkles,
-  Info,
-  Layers,
-  CheckCircle2,
+  Plus,
+  Minus,
 } from 'lucide-react';
 
 interface IndoorHallViewportProps {
@@ -109,43 +108,110 @@ export const IndoorHallViewport: React.FC<IndoorHallViewportProps> = ({
     <div className="flex flex-col space-y-4">
       {/* Viewport Principal SVG */}
       <div className="relative w-full rounded-2xl border border-slate-800 bg-[#0b101b] shadow-2xl overflow-hidden select-none">
-        {/* Cabeçalho superior com título do slide */}
-        <div className="flex flex-wrap items-center justify-between px-5 py-3 border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-sm gap-2">
+        {/* Cabeçalho superior com título e controlos de Baffles */}
+        <div className="flex flex-wrap items-center justify-between px-5 py-3 border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-sm gap-3">
           <div className="flex items-center gap-2.5">
             <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-teal-500/20 text-teal-400 font-bold text-xs border border-teal-500/40">
               1
             </span>
-            <h2 className="text-sm font-bold tracking-wider text-teal-300 uppercase">
-              O que acontece na nave industrial
-            </h2>
-            <span className="text-xs text-slate-400 hidden sm:inline">
-              · Modelo de Hopkins-Stryker / Sabine (Campo Direto vs. Reverberado)
-            </span>
+            <div>
+              <h2 className="text-sm font-bold tracking-wider text-teal-300 uppercase m-0 leading-tight">
+                O que acontece na nave industrial
+              </h2>
+              <span className="text-[11px] text-slate-400">
+                Hopkins-Stryker (Campo Direto vs. Reverberado)
+              </span>
+            </div>
           </div>
 
-          {/* Atalhos para Posto A (2m) e Posto B (6m) */}
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-400 font-medium hidden md:inline">Atalhos do Slide:</span>
-            <button
-              onClick={() => onUpdateHallState({ operatorDistanceM: 2.0 })}
-              className={`px-2.5 py-1 rounded-lg border font-mono transition-all ${
-                Math.abs(operatorDistanceM - 2.0) < 0.2
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/60 shadow-sm'
-                  : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-              }`}
-            >
-              Posto A (2 m)
-            </button>
-            <button
-              onClick={() => onUpdateHallState({ operatorDistanceM: 6.0 })}
-              className={`px-2.5 py-1 rounded-lg border font-mono transition-all ${
-                Math.abs(operatorDistanceM - 6.0) < 0.2
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/60 shadow-sm'
-                  : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-              }`}
-            >
-              Posto B (6 m)
-            </button>
+          {/* Controlos Superiores: Baffles e Atalhos */}
+          <div className="flex flex-wrap items-center gap-3 text-xs">
+            {/* Controlo de Baffles (Ligar/Desligar e Quantidade) */}
+            <div className="flex items-center gap-2 bg-slate-950/80 p-1 rounded-xl border border-slate-800">
+              {/* Botão Ligar/Desligar */}
+              <button
+                onClick={() => onUpdateHallState({ bafflesEnabled: !hallState.bafflesEnabled })}
+                className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
+                  hallState.bafflesEnabled
+                    ? 'bg-teal-600 hover:bg-teal-500 text-white shadow-teal-950'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{hallState.bafflesEnabled ? 'Baffles: Ligados' : 'Baffles: Desligados'}</span>
+              </button>
+
+              {/* Ajuste da quantidade de Baffles */}
+              <div
+                className={`flex items-center gap-1 pl-1 transition-opacity ${
+                  hallState.bafflesEnabled ? 'opacity-100' : 'opacity-40 pointer-events-none'
+                }`}
+              >
+                <button
+                  onClick={() => onUpdateHallState({ bafflesCount: Math.max(2, hallState.bafflesCount - 2) })}
+                  disabled={!hallState.bafflesEnabled || hallState.bafflesCount <= 2}
+                  className="p-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 transition-colors"
+                  title="Diminuir Baffles (-2)"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+
+                <span className="px-2 py-0.5 font-mono font-bold text-teal-300 text-xs min-w-[50px] text-center">
+                  {hallState.bafflesCount} un.
+                </span>
+
+                <button
+                  onClick={() => onUpdateHallState({ bafflesCount: Math.min(40, hallState.bafflesCount + 2) })}
+                  disabled={!hallState.bafflesEnabled || hallState.bafflesCount >= 40}
+                  className="p-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 transition-colors"
+                  title="Aumentar Baffles (+2)"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+
+                {/* Botões de quantidade rápida */}
+                <div className="hidden sm:flex items-center gap-1 border-l border-slate-800 ml-1.5 pl-1.5">
+                  {[10, 20, 30, 40].map((count) => (
+                    <button
+                      key={count}
+                      onClick={() => onUpdateHallState({ bafflesCount: count })}
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono transition-all ${
+                        hallState.bafflesCount === count
+                          ? 'bg-teal-500/20 text-teal-300 font-bold border border-teal-500/40'
+                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                      }`}
+                    >
+                      {count}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Atalhos para Posto A (2m) e Posto B (6m) */}
+            <div className="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-slate-800">
+              <span className="text-slate-400 font-medium px-1 hidden md:inline text-[11px]">Slide:</span>
+              <button
+                onClick={() => onUpdateHallState({ operatorDistanceM: 2.0 })}
+                className={`px-2.5 py-1 rounded-lg border font-mono transition-all ${
+                  Math.abs(operatorDistanceM - 2.0) < 0.2
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/60 shadow-sm font-bold'
+                    : 'bg-slate-800/80 text-slate-300 border-slate-700/60 hover:bg-slate-700'
+                }`}
+              >
+                Posto A (2 m)
+              </button>
+              <button
+                onClick={() => onUpdateHallState({ operatorDistanceM: 6.0 })}
+                className={`px-2.5 py-1 rounded-lg border font-mono transition-all ${
+                  Math.abs(operatorDistanceM - 6.0) < 0.2
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/60 shadow-sm font-bold'
+                    : 'bg-slate-800/80 text-slate-300 border-slate-700/60 hover:bg-slate-700'
+                }`}
+              >
+                Posto B (6 m)
+              </button>
+            </div>
           </div>
         </div>
 
@@ -731,161 +797,6 @@ export const IndoorHallViewport: React.FC<IndoorHallViewportProps> = ({
                 {result.isOperatorInReverberantField ? 'Campo Reverberado' : 'Campo Direto'}
               </strong>.
             </p>
-          </div>
-        </div>
-      </div>
-
-      {/* PAINEL DE CONTROLO DIDÁTICO E EXPLICAÇÃO TEÓRICA */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Controlos dos Parâmetros da Sala e Baffles */}
-        <div className="lg:col-span-7 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-teal-400" />
-              <h3 className="text-sm font-bold text-slate-200 m-0">
-                Parâmetros Acústicos da Nave Industrial
-              </h3>
-            </div>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-800/50">
-              Hopkins-Stryker
-            </span>
-          </div>
-
-          {/* Toggle de Baffles */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
-            <div>
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-teal-400" />
-                <span className="text-sm font-semibold text-slate-200">
-                  Baffles Absorventes no Teto
-                </span>
-              </div>
-              <span className="text-xs text-slate-400">
-                Painéis verticais suspensos de alta absorção acústica (lã mineral / espuma)
-              </span>
-            </div>
-
-            <button
-              onClick={() => onUpdateHallState({ bafflesEnabled: !hallState.bafflesEnabled })}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md ${
-                hallState.bafflesEnabled
-                  ? 'bg-teal-600 hover:bg-teal-500 text-white shadow-teal-950'
-                  : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-              }`}
-            >
-              {hallState.bafflesEnabled ? '✓ Baffles Ativados' : 'Desativados'}
-            </button>
-          </div>
-
-          {/* Sliders de Controlo */}
-          <div className="space-y-3 text-xs">
-            {/* Quantidade de Baffles */}
-            <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-slate-300 font-medium">Quantidade de Baffles Suspensos:</span>
-                <span className="text-teal-400 font-mono font-bold">{hallState.bafflesCount} un.</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="40"
-                step="2"
-                value={hallState.bafflesCount}
-                disabled={!hallState.bafflesEnabled}
-                onChange={(e) => onUpdateHallState({ bafflesCount: Number(e.target.value) })}
-                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-500 disabled:opacity-40"
-              />
-              <div className="flex justify-between text-[10px] text-slate-400">
-                <span>0 un. (Nenhum)</span>
-                <span>10 un. (Ligeiro)</span>
-                <span>20 un. (Recomendado)</span>
-                <span>40 un. (Intensivo)</span>
-              </div>
-            </div>
-
-            {/* Distância do Operador */}
-            <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-slate-300 font-medium">Posição do Operador (Distância r):</span>
-                <span className="text-amber-400 font-mono font-bold">{hallState.operatorDistanceM} metros</span>
-              </div>
-              <input
-                type="range"
-                min="0.5"
-                max={Math.max(1, Number((hallState.roomLengthM - hallState.machineX - 0.6).toFixed(1)))}
-                step="0.25"
-                value={hallState.operatorDistanceM}
-                onChange={(e) => onUpdateHallState({ operatorDistanceM: Number(e.target.value) })}
-                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
-              />
-              <div className="flex justify-between text-[10px] text-slate-400">
-                <span>0.5 m (Muito Próximo)</span>
-                <span>2.0 m (Posto A)</span>
-                <span>6.0 m (Posto B)</span>
-                <span>8.0 m (Fundo da Sala)</span>
-              </div>
-            </div>
-
-            {/* Potência Sonora da Máquina */}
-            <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-slate-300 font-medium">Potência Sonora da Máquina (Lw):</span>
-                <span className="text-sky-400 font-mono font-bold">{hallState.machineSoundPowerLw} dB</span>
-              </div>
-              <input
-                type="range"
-                min="80"
-                max="115"
-                step="1"
-                value={hallState.machineSoundPowerLw}
-                onChange={(e) => onUpdateHallState({ machineSoundPowerLw: Number(e.target.value) })}
-                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Cartão Didático Explicativo do Slide */}
-        <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-5 space-y-3.5 flex flex-col justify-between shadow-xl">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-teal-400 font-bold text-sm border-b border-slate-800 pb-2">
-              <Info className="w-4 h-4 text-teal-400" />
-              <span>Conclusão Didática do Slide</span>
-            </div>
-
-            <div className="text-xs text-slate-300 space-y-2.5 leading-relaxed">
-              <p>
-                Em recintos fechados reverberantes como esta nave industrial com superfícies rígidas (betão/chapa),
-                existem dois regimes acústicos distintos separados pela <strong>Distância Crítica (rc)</strong>:
-              </p>
-
-              <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] space-y-1">
-                <div>
-                  <strong className="text-amber-400">1. Antes de rc (r &lt; rc):</strong> O som direto predomina e decresce 6 dB a cada duplicação da distância.
-                </div>
-                <div>
-                  <strong className="text-sky-400">2. Após rc (r &gt; rc):</strong> O som reverberado (reflexões acumuladas nas paredes e teto) domina uniformemente toda a nave.
-                </div>
-              </div>
-
-              <div className="p-3 rounded-lg bg-teal-950/40 border border-teal-800/40 text-teal-200 text-[11px] space-y-1.5">
-                <div className="font-semibold text-teal-300 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-teal-400" />
-                  <span>Por que afastar a máquina não resulta?</span>
-                </div>
-                <p className="m-0 text-slate-300">
-                  Como a distância crítica sem baffles é de apenas <strong>{result.criticalDistanceRc} m</strong>, deslocar o operador do <strong>Posto A (2 m)</strong> para o <strong>Posto B (6 m)</strong> produz uma redução irrisória de apenas <strong>{result.diffPostoABDb} dB</strong>!
-                </p>
-                <p className="m-0 text-teal-300 font-medium">
-                  A solução real consiste em instalar <strong>Baffles Absorventes</strong> no teto para aumentar a constante de sala (R) e derrubar o nível de reverberação em <strong>-{result.baffleNoiseReductionDb > 0 ? result.baffleNoiseReductionDb : '4 a 6'} dB</strong> em toda a sala!
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-            <span>Fórmula de Hopkins-Stryker:</span>
-            <span className="font-mono text-slate-300">Lp = Lw + 10 log(Q/(4πr²) + 4/R)</span>
           </div>
         </div>
       </div>
