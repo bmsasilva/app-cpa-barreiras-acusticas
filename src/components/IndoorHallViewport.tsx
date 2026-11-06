@@ -731,7 +731,7 @@ export const IndoorHallViewport: React.FC<IndoorHallViewportProps> = ({
         {/* Rodapé Interno com Análise Didática Instantânea com altura estável */}
         <div className="bg-slate-950 border-t border-slate-800 p-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
           <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 h-[76px] flex flex-col justify-between">
-            <span className="text-slate-400 font-medium block">Comparação Slide (Posto A vs B):</span>
+            <span className="text-slate-400 font-medium block">Comparação Posto A vs Posto B:</span>
             <div className="flex items-center justify-between text-slate-200">
               <span>Posto A (2 m): <strong className="text-amber-400 font-mono">{result.levelAt2m} dB</strong></span>
               <span>Posto B (6 m): <strong className="text-amber-400 font-mono">{result.levelAt6m} dB</strong></span>

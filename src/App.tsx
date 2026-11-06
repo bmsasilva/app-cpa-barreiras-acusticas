@@ -382,9 +382,6 @@ export function App() {
             >
               <Warehouse className="w-4 h-4 text-teal-300" />
               <span>2. Nave Industrial (Espaço Fechado · Baffles no Teto)</span>
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30">
-                Slide 1
-              </span>
             </button>
           </div>
 
