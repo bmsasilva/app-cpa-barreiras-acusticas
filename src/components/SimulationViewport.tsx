@@ -11,6 +11,7 @@ import {
   Eye,
   EyeOff,
   Flame,
+  Gauge,
   Maximize2,
   Minimize2,
   MoveHorizontal,
@@ -65,6 +66,7 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 900, height: 460 });
   const [isPlaying, setIsPlaying] = useState(true);
+  const [waveSpeed, setWaveSpeed] = useState<number>(30); // 0 = estático, 100 = velocidade máx
   const [animationPhase, setAnimationPhase] = useState(0);
   const [activeDrag, setActiveDrag] = useState<
     'barrier_pos' | 'barrier_height' | 'source_pos' | 'receiver_pos' | null
@@ -86,18 +88,20 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
     return () => observer.disconnect();
   }, []);
 
-  // Loop de animação de ondas suave e serena (~60 fps)
+  // Loop de animação de ondas com velocidade configurável (~60 fps)
   useEffect(() => {
-    if (!isPlaying) return;
+    // Se a reprodução estiver pausada ou a velocidade for 0, as ondas ficam estáticas
+    if (!isPlaying || waveSpeed === 0) return;
     let animId: number;
     const step = () => {
-      // Velocidade reduzida para movimento calmo e confortável para os olhos
-      setAnimationPhase((prev) => (prev + 0.006) % 1.0);
+      // Delta proporcional à velocidade escolhida (ex: 30% -> 0.006)
+      const delta = (waveSpeed / 100) * 0.02;
+      setAnimationPhase((prev) => (prev + delta) % 1.0);
       animId = requestAnimationFrame(step);
     };
     animId = requestAnimationFrame(step);
     return () => cancelAnimationFrame(animId);
-  }, [isPlaying]);
+  }, [isPlaying, waveSpeed]);
 
   // Conversão de Coordenadas Físicas (metros) -> SVG Pixels
   const groundYPx = dimensions.height - 75; // linha do solo
@@ -248,8 +252,8 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           </div>
         </div>
 
-        {/* Toggles Visuais Rápidos */}
-        <div className="flex items-center gap-1 bg-slate-900/90 backdrop-blur-md px-2 py-1 rounded-xl border border-slate-700/80 shadow-lg text-xs">
+        {/* Toggles Visuais Rápidos e Controlo de Velocidade */}
+        <div className="flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md px-2 py-1 rounded-xl border border-slate-700/80 shadow-lg text-xs">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
             title={isPlaying ? 'Pausar animação de ondas' : 'Retomar animação de ondas'}
@@ -259,6 +263,28 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           >
             {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
           </button>
+
+          {/* Slider de Velocidade das Ondas */}
+          <div
+            className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-950/70 rounded-lg border border-slate-800"
+            title={waveSpeed === 0 ? 'Ondas estáticas (0)' : `Velocidade das ondas: ${waveSpeed}%`}
+          >
+            <Gauge className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+            <span className="text-[10px] text-slate-400 font-medium hidden sm:inline">Velocidade:</span>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              value={waveSpeed}
+              onChange={(e) => setWaveSpeed(Number(e.target.value))}
+              className="w-16 sm:w-20 accent-indigo-500 cursor-pointer h-1.5 bg-slate-700 rounded-lg appearance-none"
+              aria-label="Velocidade das ondas"
+            />
+            <span className="font-mono text-[10px] w-6 text-right text-indigo-300 select-none">
+              {waveSpeed === 0 ? '0' : `${waveSpeed}%`}
+            </span>
+          </div>
 
           <button
             onClick={() => onUpdateToggles({ showHeatmap: !toggles.showHeatmap })}
