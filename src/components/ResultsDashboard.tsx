@@ -53,12 +53,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
       {/* CARTÕES DE MÉTRICAS PRINCIPAIS (6 Cards) */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
         <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl shadow-md">
-          <div className="flex items-center justify-between">
-            <div className="text-[11px] text-slate-400 font-medium">Sem Barreira</div>
-            <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
-              {result.sourceType === 'line' ? '3 dB/dupl.' : '6 dB/dupl.'}
-            </span>
-          </div>
+          <div className="text-[11px] text-slate-400 font-medium">Sem Barreira</div>
           <div className="font-mono text-xl font-bold text-slate-100 mt-1">
             {result.levelFreeField} <span className="text-xs text-slate-400 font-sans">dB</span>
           </div>

@@ -232,7 +232,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     Indústria / Fábrica
                   </div>
                   <div className="text-[10px] text-slate-400 mt-0.5">
-                    <strong>-6 dB</strong> por duplicação da distância (20 log₁₀ r)
+                    Divergência esférica (espaço livre)
                   </div>
                 </button>
 
@@ -253,7 +253,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     Estrada / Tráfego
                   </div>
                   <div className="text-[10px] text-slate-400 mt-0.5">
-                    <strong>-3 dB</strong> por duplicação da distância (10 log₁₀ r)
+                    Divergência cilíndrica (fluxo contínuo)
                   </div>
                 </button>
               </div>

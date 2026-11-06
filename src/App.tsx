@@ -152,7 +152,7 @@ export function App() {
     doc.text(`- Distância Fonte-Recetor: ${result.d0} m`, 16, 50);
     doc.text(
       `- Altura da Fonte: ${source.height} m (Nível: ${source.soundPowerLevel} dB @ ${source.frequency} Hz | ${
-        source.sourceType === 'line' ? 'Fonte Linear: Estrada (3 dB/dupl.)' : 'Fonte Pontual: Indústria (6 dB/dupl.)'
+        source.sourceType === 'line' ? 'Fonte Linear: Estrada / Tráfego' : 'Fonte Pontual: Indústria / Fábrica'
       })`,
       16,
       56

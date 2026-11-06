@@ -44,12 +44,12 @@ export const AcousticMethodologyModal: React.FC<AcousticMethodologyModalProps> =
             <div className="bg-slate-950 p-2 rounded-xl border border-slate-800">
               <span className="text-amber-400 font-semibold block mb-0.5">🏭 Fonte Pontual (Indústria)</span>
               <span className="text-sky-300">L₂ = L₁ − 20 · log₁₀(r₂ / r₁)</span>
-              <span className="text-[10px] text-slate-500 block mt-0.5">Divergência esférica (−6 dB por duplicação)</span>
+              <span className="text-[10px] text-slate-500 block mt-0.5">Divergência esférica</span>
             </div>
             <div className="bg-slate-950 p-2 rounded-xl border border-slate-800">
               <span className="text-blue-400 font-semibold block mb-0.5">🛣️ Fonte Linear (Estrada / Tráfego)</span>
               <span className="text-sky-300">L₂ = L₁ − 10 · log₁₀(r₂ / r₁)</span>
-              <span className="text-[10px] text-slate-500 block mt-0.5">Divergência cilíndrica (−3 dB por duplicação)</span>
+              <span className="text-[10px] text-slate-500 block mt-0.5">Divergência cilíndrica</span>
             </div>
           </div>
           <p className="text-slate-400">

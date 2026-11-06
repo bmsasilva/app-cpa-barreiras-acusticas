@@ -86,12 +86,13 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
     return () => observer.disconnect();
   }, []);
 
-  // Loop de animação de ondas (60 fps)
+  // Loop de animação de ondas suave e serena (~60 fps)
   useEffect(() => {
     if (!isPlaying) return;
     let animId: number;
     const step = () => {
-      setAnimationPhase((prev) => (prev + 0.04) % 1.0);
+      // Velocidade reduzida para movimento calmo e confortável para os olhos
+      setAnimationPhase((prev) => (prev + 0.006) % 1.0);
       animId = requestAnimationFrame(step);
     };
     animId = requestAnimationFrame(step);
@@ -218,33 +219,31 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
             </span>
           </div>
 
-          {/* Seletor Rápido de Modelo de Emissor: Fábrica (-6dB) vs Estrada (-3dB) */}
+          {/* Seletor Rápido de Modelo de Emissor: Fábrica vs Estrada */}
           <div className="flex items-center bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/80 text-xs shadow-lg gap-1">
             <button
               type="button"
               onClick={() => onUpdateSource({ sourceType: 'point' })}
-              className={`px-2.5 py-1 rounded-lg flex items-center gap-1 font-medium transition-all ${
+              className={`px-3 py-1 rounded-lg flex items-center gap-1.5 font-medium transition-all ${
                 source.sourceType !== 'line'
                   ? 'bg-orange-600 text-white shadow-sm font-bold'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
-              title="Fonte Pontual: Fábrica / Indústria (-6 dB por duplicação da distância)"
+              title="Fonte Pontual: Fábrica / Indústria"
             >
               <span>🏭 Fábrica</span>
-              <span className="text-[10px] opacity-80 font-mono">(-6dB)</span>
             </button>
             <button
               type="button"
               onClick={() => onUpdateSource({ sourceType: 'line' })}
-              className={`px-2.5 py-1 rounded-lg flex items-center gap-1 font-medium transition-all ${
+              className={`px-3 py-1 rounded-lg flex items-center gap-1.5 font-medium transition-all ${
                 source.sourceType === 'line'
                   ? 'bg-amber-600 text-white shadow-sm font-bold'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
-              title="Fonte Linear: Estrada com tráfego contínuo (-3 dB por duplicação da distância)"
+              title="Fonte Linear: Estrada / Tráfego rodoviário"
             >
               <span>🛣️ Estrada</span>
-              <span className="text-[10px] opacity-80 font-mono">(-3dB)</span>
             </button>
           </div>
         </div>
@@ -668,7 +667,7 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
               ESTRADA / VIA RÁPIDA
             </text>
             <text x={toPxX(2.2)} y={toPxY(3.1)} fill="#fbbf24" fontSize="9" textAnchor="middle" fontWeight="medium">
-              Fonte Linear: -3 dB / duplicação
+              Fonte Linear (Tráfego)
             </text>
             <text x={toPxX(2.2)} y={toPxY(2.5)} fill="#94a3b8" fontSize="8.5" textAnchor="middle">
               {source.soundPowerLevel} dB @ {source.frequency}Hz
@@ -684,8 +683,7 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
                 cy={srcPx.y}
                 r="16"
                 fill="#f59e0b"
-                fillOpacity="0.25"
-                className="animate-ping"
+                fillOpacity="0.2"
               />
               <circle cx={srcPx.x} cy={srcPx.y} r="12" fill="#d97706" stroke="#fef3c7" strokeWidth="2.5" />
               <circle cx={srcPx.x} cy={srcPx.y} r="4" fill="#ffffff" />
@@ -731,7 +729,7 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
               FÁBRICA
             </text>
             <text x={toPxX(1.7)} y={toPxY(1.9)} fill="#f97316" fontSize="8.5" textAnchor="middle">
-              Fonte Pontual: -6 dB / dupl.
+              Fonte Pontual (Indústria)
             </text>
             <text x={toPxX(1.7)} y={toPxY(1.3)} fill="#94a3b8" fontSize="8.5" textAnchor="middle">
               {source.soundPowerLevel} dB @ {source.frequency}Hz
@@ -747,7 +745,6 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
                 r="16"
                 fill="#f97316"
                 fillOpacity="0.2"
-                className="animate-ping"
               />
               <circle cx={srcPx.x} cy={srcPx.y} r="12" fill="#ea580c" stroke="#fed7aa" strokeWidth="2.5" />
               <circle cx={srcPx.x} cy={srcPx.y} r="4" fill="#ffffff" />
