@@ -260,7 +260,7 @@ export function App() {
               onReset={handleReset}
             />
 
-            <div className="bg-slate-900/90 border border-slate-800/80 px-4 py-2.5 rounded-xl flex flex-wrap items-center justify-between text-xs text-slate-300 gap-2 shadow-md">
+            <div className="bg-slate-900/90 border border-slate-800/80 px-4 py-2.5 rounded-xl flex items-center justify-between text-xs text-slate-300 gap-2 shadow-md">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
                 <span>
@@ -269,9 +269,6 @@ export function App() {
                     {result.netReduction > 0 ? `-${result.netReduction.toFixed(1)} dB` : '0.0 dB'}
                   </strong>
                 </span>
-              </div>
-              <div className="text-slate-400">
-                Fresnel: <strong className="text-white font-mono">{result.fresnelNumber}</strong> | Diferença de Percurso: <strong className="text-purple-300 font-mono">{result.pathDifference > 0 ? `+${result.pathDifference}m` : `${result.pathDifference}m`}</strong>
               </div>
               <div className="text-amber-400 font-medium">
                 Custo: <strong className="font-mono">{result.totalCostEuro.toLocaleString('pt-PT')} €</strong>
