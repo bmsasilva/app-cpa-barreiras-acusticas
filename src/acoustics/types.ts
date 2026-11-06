@@ -13,7 +13,17 @@ export const A_WEIGHTING: Record<FrequencyHz, number> = {
 };
 
 export type MaterialId = 'betao' | 'madeira' | 'chapa' | 'acrilico' | 'absorvente';
-export type SourceType = 'point' | 'line'; // 'point': Indústria (-6 dB/dupl.) | 'line': Estrada (-3 dB/dupl.)
+export type SourceType = 'point' | 'line';
+export type AnnoyanceLevel = 'low' | 'moderate' | 'high' | 'critical';
+
+export interface ResidentAnnoyance {
+  score: number; // 0 a 100 (%)
+  level: AnnoyanceLevel;
+  label: string; // 'Baixo Impacto' | 'Impacto Moderado' | 'Desagradável' | 'Crítico (Muralha)'
+  color: string; // Hexadecimal da cor para UI
+  distanceToFacadeM: number; // Distância horizontal da barreira à fachada (m)
+  occlusionAngleDeg: number; // Ângulo de oclusão visual da janela (graus)
+} // 'point': Indústria (-6 dB/dupl.) | 'line': Estrada (-3 dB/dupl.)
 
 export interface AcousticMaterial {
   id: MaterialId;
@@ -93,6 +103,9 @@ export interface AcousticCalculationResult {
   // Métricas económicas
   totalAreaM2: number;
   totalCostEuro: number;
+
+  // Impacto visual e aceitação social dos moradores
+  residentAnnoyance: ResidentAnnoyance;
 
   // Propriedades estruturais e de espessura
   effectiveThicknessM: number; // Espessura real da barreira (m)

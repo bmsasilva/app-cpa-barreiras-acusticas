@@ -99,7 +99,21 @@ export const AcousticMethodologyModal: React.FC<AcousticMethodologyModalProps> =
           </p>
         </div>
 
-        {/* 4. Limitações Metodológicas do Modelo */}
+        {/* 4. Coeficiente de Desagradabilidade Visual / Impacto nos Moradores */}
+        <div className="space-y-1.5 text-xs">
+          <h4 className="font-bold text-amber-400 text-sm">4. Coeficiente de Desagradabilidade dos Moradores (Impacto Visual)</h4>
+          <p className="leading-relaxed">
+            Mede o impacto psicossocial, perda de luz natural e sensação de claustrofobia (efeito muralha) provocado pela barreira em frente à habitação:
+          </p>
+          <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 font-mono text-center text-amber-300">
+            Desagrado (%) = f(Ângulo de Oclusão Visual, Proximidade à Fachada) × Fator do Material
+          </div>
+          <p className="text-slate-400">
+            Fator do material: Acrílico PMMA Transparente (0.25 - passagem de luz solar), Madeira Tratada (0.65), Painel Absorvente (0.85), Betão Armado (1.00 - muralha maciça), Chapa Metálica (1.15).
+          </p>
+        </div>
+
+        {/* 5. Limitações Metodológicas do Modelo */}
         <div className="bg-amber-950/20 border border-amber-900/50 p-3.5 rounded-xl space-y-2 text-xs">
           <div className="flex items-center gap-2 font-bold text-amber-300">
             <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />

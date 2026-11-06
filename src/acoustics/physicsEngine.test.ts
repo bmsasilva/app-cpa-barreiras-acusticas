@@ -184,4 +184,41 @@ describe('Motor Acústico - Testes Unitários de Física', () => {
     expect(resThick.levelWithBarrier).toBeLessThan(resThin.levelWithBarrier);
     expect(resThick.netReduction).toBeGreaterThan(resThin.netReduction);
   });
+
+  it('deve calcular corretamente o coeficiente de desagradabilidade dos moradores (impacto visual e proximidade)', () => {
+    const receiver: SimulationReceiver = { x: 30, height: 1.5 };
+
+    // 1. Barreira distante da casa (x=5m, a 25m da casa)
+    const barrierFar: SimulationBarrier = {
+      enabled: true,
+      x: 5,
+      height: 3.0,
+      thickness: 0.15,
+      materialId: 'betao',
+      lengthM: 20,
+    };
+    const resFar = calculateAcoustics({ x: 0, height: 1.5, soundPowerLevel: 90, frequency: 1000 }, barrierFar, receiver);
+    expect(resFar.residentAnnoyance.score).toBeLessThanOrEqual(25);
+    expect(resFar.residentAnnoyance.level).toBe('low');
+
+    // 2. Barreira colada à casa (x=27.5m, a 2.5m da casa) com Betão opaco
+    const barrierCloseConcrete: SimulationBarrier = {
+      enabled: true,
+      x: 27.5,
+      height: 4.0,
+      thickness: 0.15,
+      materialId: 'betao',
+      lengthM: 20,
+    };
+    const resCloseConcrete = calculateAcoustics({ x: 0, height: 1.5, soundPowerLevel: 90, frequency: 1000 }, barrierCloseConcrete, receiver);
+    expect(resCloseConcrete.residentAnnoyance.score).toBeGreaterThan(60);
+
+    // 3. Mesma barreira colada à casa, mas com Acrílico Transparente (deixa passar luz)
+    const barrierCloseAcrylic: SimulationBarrier = {
+      ...barrierCloseConcrete,
+      materialId: 'acrilico',
+    };
+    const resCloseAcrylic = calculateAcoustics({ x: 0, height: 1.5, soundPowerLevel: 90, frequency: 1000 }, barrierCloseAcrylic, receiver);
+    expect(resCloseAcrylic.residentAnnoyance.score).toBeLessThan(resCloseConcrete.residentAnnoyance.score);
+  });
 });

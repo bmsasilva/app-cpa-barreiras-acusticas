@@ -778,6 +778,39 @@ export const SimulationViewport: React.FC<SimulationViewportProps> = ({
           />
           <rect x={housePx + houseWPx * 0.75} y={toPxY(7.0)} width="10" height={toPxY(5.5) - toPxY(7.0)} fill="#7f1d1d" />
 
+          {/* Badge de Impacto nos Moradores acima da Habitação */}
+          {barrier.enabled && (
+            <g transform={`translate(${housePx + houseWPx / 2 - 50}, ${toPxY(8.4)})`}>
+              <rect
+                x="0"
+                y="0"
+                width="100"
+                height="19"
+                rx="5"
+                fill="#0f172a"
+                fillOpacity="0.9"
+                stroke={result.residentAnnoyance.color}
+                strokeWidth="1.2"
+              />
+              <circle
+                cx="10"
+                cy="9.5"
+                r="3"
+                fill={result.residentAnnoyance.color}
+              />
+              <text
+                x="55"
+                y="13"
+                fill={result.residentAnnoyance.color}
+                fontSize="9"
+                fontWeight="bold"
+                textAnchor="middle"
+              >
+                Moradores: {result.residentAnnoyance.score}%
+              </text>
+            </g>
+          )}
+
           <rect x={housePx + 10} y={toPxY(4.8)} width="16" height="18" rx="2" fill="#fef08a" opacity="0.8" />
           <line x1={housePx + 18} y1={toPxY(4.8)} x2={housePx + 18} y2={toPxY(4.8) + 18} stroke="#713f12" strokeWidth="1" />
           <rect x={housePx + houseWPx - 26} y={toPxY(4.8)} width="16" height="18" rx="2" fill="#fef08a" opacity="0.8" />

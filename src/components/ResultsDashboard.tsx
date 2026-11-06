@@ -18,6 +18,7 @@ import {
 import {
   BarChart3,
   TrendingDown,
+  Users,
 } from 'lucide-react';
 
 interface ResultsDashboardProps {
@@ -50,8 +51,8 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* CARTÕES DE MÉTRICAS PRINCIPAIS: Apenas Redução Sonora Efetiva e Custo */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {/* CARTÕES DE MÉTRICAS PRINCIPAIS: Redução Sonora, Desagrado Moradores e Custo */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Redução Sonora Efetiva */}
         <div className="bg-gradient-to-br from-emerald-950/50 to-slate-900 border border-emerald-800/60 p-3.5 rounded-xl shadow-md">
           <div className="text-xs text-emerald-400 font-semibold flex items-center justify-between">
@@ -67,6 +68,21 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
           </div>
         </div>
 
+        {/* Desagrado dos Moradores */}
+        <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-3.5 rounded-xl shadow-md">
+          <div className="text-xs font-semibold flex items-center justify-between" style={{ color: result.residentAnnoyance.color }}>
+            <span>Desagrado dos Moradores</span>
+            <Users className="w-4 h-4" />
+          </div>
+          <div className="font-mono text-2xl font-bold mt-1" style={{ color: result.residentAnnoyance.color }}>
+            {result.residentAnnoyance.score}%{' '}
+            <span className="text-xs font-sans opacity-80">({result.residentAnnoyance.label})</span>
+          </div>
+          <div className="text-[11px] text-slate-400 mt-0.5">
+            Oclusão: {result.residentAnnoyance.occlusionAngleDeg}° • Distância: {result.residentAnnoyance.distanceToFacadeM}m
+          </div>
+        </div>
+
         {/* Custo Estimado */}
         <div className="bg-gradient-to-br from-amber-950/40 to-slate-900 border border-amber-800/60 p-3.5 rounded-xl shadow-md">
           <div className="text-xs text-amber-400 font-semibold flex items-center justify-between">
@@ -78,7 +94,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
             <span className="text-xs text-amber-500 font-sans">€</span>
           </div>
           <div className="text-[11px] text-slate-400 mt-0.5">
-            Investimento total da barreira ({barrier.height.toFixed(1)}m alt. × {barrier.lengthM}m comp.)
+            {result.totalAreaM2} m² totais ({barrier.height.toFixed(1)}m × {barrier.lengthM}m)
           </div>
         </div>
       </div>

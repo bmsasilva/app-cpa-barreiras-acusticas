@@ -179,7 +179,8 @@ export function App() {
     doc.text(`- Diferença de Percurso (δ): ${result.pathDifference} m (Número de Fresnel N = ${result.fresnelNumber})`, 16, 114);
     doc.text(`- Perda por Difração no Topo (ΔLdif): ${result.diffractionAttenuation} dB (Bónus espessura: +${result.thicknessDiffractionBonusDb} dB)`, 16, 120);
     doc.text(`- Perda por Transmissão Efetiva (R): ${result.materialTransmissionLoss} dB (Lei da Massa)`, 16, 126);
-    doc.text(`- Custo Fictício Estimado: ${result.totalCostEuro} € (Área: ${result.totalAreaM2} m²)`, 16, 132);
+    doc.text(`- Desagrado dos Moradores (Impacto Visual): ${result.residentAnnoyance.score}% (${result.residentAnnoyance.label} | Distância Fachada: ${result.residentAnnoyance.distanceToFacadeM}m)`, 16, 132);
+    doc.text(`- Custo Fictício Estimado: ${result.totalCostEuro} € (Área: ${result.totalAreaM2} m²)`, 16, 138);
 
     doc.setFontSize(9);
     doc.setTextColor(100, 116, 139);
@@ -260,7 +261,7 @@ export function App() {
               onReset={handleReset}
             />
 
-            <div className="bg-slate-900/90 border border-slate-800/80 px-4 py-2.5 rounded-xl flex items-center justify-between text-xs text-slate-300 gap-2 shadow-md">
+            <div className="bg-slate-900/90 border border-slate-800/80 px-4 py-2.5 rounded-xl flex flex-wrap items-center justify-between text-xs text-slate-300 gap-3 shadow-md">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
                 <span>
@@ -270,6 +271,22 @@ export function App() {
                   </strong>
                 </span>
               </div>
+
+              {/* Coeficiente de Desagrado dos Moradores */}
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-2.5 h-2.5 rounded-full inline-block"
+                  style={{ backgroundColor: result.residentAnnoyance.color }}
+                />
+                <span>
+                  Desagrado Moradores:{' '}
+                  <strong className="text-sm font-mono" style={{ color: result.residentAnnoyance.color }}>
+                    {result.residentAnnoyance.score}%
+                  </strong>{' '}
+                  <span className="text-[11px] text-slate-400">({result.residentAnnoyance.label})</span>
+                </span>
+              </div>
+
               <div className="text-amber-400 font-medium">
                 Custo: <strong className="font-mono">{result.totalCostEuro.toLocaleString('pt-PT')} €</strong>
               </div>

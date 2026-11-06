@@ -1,5 +1,8 @@
 import type {
   AcousticCalculationResult,
+  AnnoyanceLevel,
+  MaterialId,
+  ResidentAnnoyance,
   SimulationBarrier,
   SimulationReceiver,
   SimulationSource,
@@ -68,6 +71,96 @@ export function calculateEffectiveTransmissionLoss(
 /**
  * Calcula o número de Fresnel N e a atenuação por difração (Kurze-Anderson / Maekawa com modelo de barreira espessa de Pierce/Kurze).
  */
+/**
+ * Calcula o Coeficiente de Desagradabilidade dos Moradores (0 a 100%)
+ * decorrente do impacto visual, proximidade e perda de luz natural provocada pela barreira.
+ */
+export function calculateResidentAnnoyance(
+  barrier: SimulationBarrier,
+  receiver: SimulationReceiver,
+  materialId: MaterialId
+): ResidentAnnoyance {
+  if (!barrier.enabled || barrier.height <= 0.05) {
+    return {
+      score: 0,
+      level: 'low',
+      label: 'Nulo (Sem Barreira)',
+      color: '#10b981',
+      distanceToFacadeM: Number(Math.max(0, receiver.x - barrier.x).toFixed(1)),
+      occlusionAngleDeg: 0,
+    };
+  }
+
+  // Distância horizontal da barreira à fachada da habitação
+  const distToFacade = Math.max(0.1, receiver.x - barrier.x);
+
+  // Se a barreira estiver atrás da casa, o impacto na fachada frontal é nulo
+  if (receiver.x <= barrier.x + 0.1) {
+    return {
+      score: 0,
+      level: 'low',
+      label: 'Nulo (Atrás)',
+      color: '#10b981',
+      distanceToFacadeM: Number(distToFacade.toFixed(1)),
+      occlusionAngleDeg: 0,
+    };
+  }
+
+  // Altura relativa em relação ao peitoril da janela (olhar do morador a ~1.0m)
+  const windowSillH = Math.max(0.8, receiver.height * 0.7);
+  const deltaH = Math.max(0, barrier.height - windowSillH);
+  const angleRad = Math.atan2(deltaH, distToFacade);
+  const angleDeg = (angleRad * 180) / Math.PI;
+
+  // Fator visual e psicológico do material (transparência e biofilia)
+  const MATERIAL_VISUAL_FACTORS: Record<MaterialId, number> = {
+    acrilico: 0.25,   // Transparente (passagem de luz solar e horizonte livre)
+    madeira: 0.65,    // Madeira tratada (integração biofílica acolhedora)
+    absorvente: 0.85, // Painel técnico neutro
+    betao: 1.00,      // Betão maciço pesado (sensação de muralha)
+    chapa: 1.15,      // Chapa metálica (estética industrial agressiva)
+  };
+  const matFactor = MATERIAL_VISUAL_FACTORS[materialId] ?? 1.0;
+
+  // Impacto da proximidade (efeito claustrofóbico se colado à casa)
+  const proximityTerm = Math.pow(15 / Math.max(2.5, distToFacade), 0.85);
+  // Impacto da oclusão angular da abóbada celeste
+  const angleTerm = Math.pow(Math.min(90, angleDeg) / 45, 1.2) * 50;
+  
+  // Pontuação geométrica ponderada
+  const rawGeometricScore = Math.min(100, Math.max(0, angleTerm * (0.4 + 0.6 * Math.min(2.0, proximityTerm))));
+
+  // Pontuação final com o fator do material
+  const finalScore = Math.round(Math.min(100, Math.max(0, rawGeometricScore * matFactor)));
+
+  let level: AnnoyanceLevel = 'low';
+  let label = 'Baixo Impacto';
+  let color = '#10b981'; // emerald-500
+
+  if (finalScore > 75) {
+    level = 'critical';
+    label = 'Crítico (Muralha)';
+    color = '#ef4444'; // red-500
+  } else if (finalScore > 50) {
+    level = 'high';
+    label = 'Desagradável';
+    color = '#f97316'; // orange-500
+  } else if (finalScore > 25) {
+    level = 'moderate';
+    label = 'Impacto Moderado';
+    color = '#eab308'; // yellow-500
+  }
+
+  return {
+    score: finalScore,
+    level,
+    label,
+    color,
+    distanceToFacadeM: Number(distToFacade.toFixed(1)),
+    occlusionAngleDeg: Number(angleDeg.toFixed(1)),
+  };
+}
+
 export function calculateDiffraction(
   pathDifference: number,
   frequency: number,
@@ -264,6 +357,9 @@ export function calculateAcoustics(
   const incAtBarrier = calculateFreeFieldLevel(effectiveSourceLevel, distSourceToBarrier, sType);
   const reflectedLevelEstimate = incAtBarrier + 10 * Math.log10(Math.max(0.01, reflectionCoeff));
 
+  // Cálculo da desagradabilidade visual / aceitação social dos moradores
+  const residentAnnoyance = calculateResidentAnnoyance(barrier, receiver, barrier.materialId);
+
   return {
     sourceType: sType,
     d0: Number(d0.toFixed(2)),
@@ -290,6 +386,7 @@ export function calculateAcoustics(
     spectrum,
     totalAreaM2: Number(totalAreaM2.toFixed(1)),
     totalCostEuro: Math.round(totalCostEuro),
+    residentAnnoyance,
 
     effectiveThicknessM: Number(thicknessM.toFixed(3)),
     surfaceMassKgM2: Number(surfaceMassKgM2.toFixed(1)),
