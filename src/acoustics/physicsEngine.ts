@@ -108,31 +108,36 @@ export function calculateResidentAnnoyance(
     };
   }
 
-  // Altura relativa em relação ao peitoril da janela (olhar do morador a ~1.0m)
-  const windowSillH = Math.max(0.8, receiver.height * 0.7);
-  const deltaH = Math.max(0, barrier.height - windowSillH);
+  // Ponto de visão do morador no piso do recetor (olhar a cerca de 1.1m do piso do recetor)
+  // Se o recetor estiver no 1º andar (4.5m), o peitoril fica a ~4.0m
+  const eyeLevelH = Math.max(1.0, receiver.height * 0.85);
+  const deltaH = Math.max(0.2, barrier.height - (eyeLevelH - 0.5));
   const angleRad = Math.atan2(deltaH, distToFacade);
   const angleDeg = (angleRad * 180) / Math.PI;
 
-  // Fator visual e psicológico do material (transparência e biofilia)
+  // Fatores estéticos, lumínicos e psicológicos do material (EIA / ISO 15666)
   const MATERIAL_VISUAL_FACTORS: Record<MaterialId, number> = {
-    acrilico: 0.25,   // Transparente (passagem de luz solar e horizonte livre)
-    madeira: 0.65,    // Madeira tratada (integração biofílica acolhedora)
-    absorvente: 0.85, // Painel técnico neutro
-    betao: 1.00,      // Betão maciço pesado (sensação de muralha)
-    chapa: 1.15,      // Chapa metálica (estética industrial agressiva)
+    acrilico: 0.32,   // Transparente (mantém luz solar e horizonte livre)
+    madeira: 0.68,    // Madeira tratada (integração biofílica e natural)
+    absorvente: 0.88, // Painel técnico liso, esteticamente neutro
+    betao: 1.00,      // Betão maciço pesado (sensação fria de muralha)
+    chapa: 1.18,      // Chapa metálica perfilada (estética agressiva industrial)
   };
   const matFactor = MATERIAL_VISUAL_FACTORS[materialId] ?? 1.0;
 
-  // Impacto da proximidade (efeito claustrofóbico se colado à casa)
-  const proximityTerm = Math.pow(15 / Math.max(2.5, distToFacade), 0.85);
-  // Impacto da oclusão angular da abóbada celeste
-  const angleTerm = Math.pow(Math.min(90, angleDeg) / 45, 1.2) * 50;
-  
-  // Pontuação geométrica ponderada
-  const rawGeometricScore = Math.min(100, Math.max(0, angleTerm * (0.4 + 0.6 * Math.min(2.0, proximityTerm))));
+  // 1. Projeção angular da abóbada celeste e horizonte cortado (cone visual humano ~30°)
+  const angleTerm = Math.pow(Math.min(60, angleDeg) / 30, 0.75) * 45;
 
-  // Pontuação final com o fator do material
+  // 2. Efeito de Escala e Rácio Altura/Distância (H / D)
+  const aspectTerm = Math.pow(barrier.height / (distToFacade + 4), 0.7) * 55;
+
+  // 3. Fator de Proximidade Crítica / Efeito Claustrofóbico (< 12 m da fachada)
+  const proximityBonus = distToFacade < 12 ? Math.pow((12 - distToFacade) / 10, 1.2) * 25 : 0;
+
+  // Pontuação base geométrica e psicológica
+  const rawGeometricScore = angleTerm + aspectTerm + proximityBonus;
+
+  // Aplicação do fator de material e clamping a [0, 100]
   const finalScore = Math.round(Math.min(100, Math.max(0, rawGeometricScore * matFactor)));
 
   let level: AnnoyanceLevel = 'low';
