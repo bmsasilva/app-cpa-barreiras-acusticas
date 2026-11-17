@@ -39,7 +39,7 @@ const INITIAL_SOURCE: SimulationSource = {
 };
 
 const INITIAL_BARRIER: SimulationBarrier = {
-  enabled: true,
+  enabled: false,
   x: 10,
   height: 3.0,
   thickness: 0.15,
