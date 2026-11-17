@@ -33,7 +33,7 @@ import jsPDF from 'jspdf';
 const INITIAL_SOURCE: SimulationSource = {
   x: 0,
   height: 1.5,
-  soundPowerLevel: 90,
+  soundPowerLevel: 95,
   frequency: 250,
   sourceType: 'point',
 };
