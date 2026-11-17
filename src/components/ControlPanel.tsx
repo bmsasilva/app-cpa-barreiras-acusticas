@@ -112,7 +112,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 </span>
               </div>
               <button
-                onClick={() => onUpdateBarrier({ enabled: !barrier.enabled })}
+                onClick={() =>
+                  onUpdateBarrier({
+                    enabled: !barrier.enabled,
+                    ...(!barrier.enabled ? { x: 15 } : {}),
+                  })
+                }
                 className={`px-3 py-1.5 rounded-lg font-medium text-xs transition-all ${
                   barrier.enabled
                     ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950'

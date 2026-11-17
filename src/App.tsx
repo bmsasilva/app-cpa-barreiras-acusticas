@@ -40,7 +40,7 @@ const INITIAL_SOURCE: SimulationSource = {
 
 const INITIAL_BARRIER: SimulationBarrier = {
   enabled: false,
-  x: 10,
+  x: 15,
   height: 3.0,
   thickness: 0.15,
   materialId: 'betao',
@@ -104,7 +104,11 @@ export function App() {
   };
 
   const handleUpdateBarrier = (partial: Partial<SimulationBarrier>) => {
-    setBarrier((prev) => ({ ...prev, ...partial }));
+    setBarrier((prev) => {
+      const isTurningOn = partial.enabled === true && !prev.enabled;
+      const x = isTurningOn && partial.x === undefined ? 15 : (partial.x ?? prev.x);
+      return { ...prev, ...partial, x };
+    });
   };
 
   const handleUpdateReceiver = (partial: Partial<SimulationReceiver>) => {
