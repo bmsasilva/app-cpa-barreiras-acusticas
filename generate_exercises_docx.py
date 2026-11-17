@@ -1,74 +1,78 @@
 import docx
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.oxml import OxmlElement, parse_xml
-from docx.oxml.ns import nsdecls
+from docx.oxml.ns import nsdecls, qn
 
-doc = docx.Document()
-
-# Margens
-sections = doc.sections
-for s in sections:
-    s.top_margin = Inches(0.8)
-    s.bottom_margin = Inches(0.8)
-    s.left_margin = Inches(0.85)
-    s.right_margin = Inches(0.85)
-
-# Styling Helpers
-def set_cell_background(cell, hex_color):
-    shading_elm = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{hex_color}"/>')
-    cell._tc.get_or_add_tcPr().append(shading_elm)
+def set_cell_background(cell, fill_hex):
+    tcPr = cell._tc.get_or_add_tcPr()
+    shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{fill_hex}"/>')
+    tcPr.append(shd)
 
 def set_cell_padding(cell, top=100, bottom=100, left=150, right=150):
     tcPr = cell._tc.get_or_add_tcPr()
-    tcMar = OxmlElement('w:tcMar')
-    for m, val in [('w:top', top), ('w:bottom', bottom), ('w:left', left), ('w:right', right)]:
-        node = parse_xml(f'<{m} {nsdecls("w")} w:w="{val}" w:type="dxa"/>')
-        tcMar.append(node)
+    tcMar = parse_xml(f'<w:tcMar {nsdecls("w")}><w:top w:w="{top}" w:type="dxa"/><w:bottom w:w="{bottom}" w:type="dxa"/><w:left w:w="{left}" w:type="dxa"/><w:right w:w="{right}" w:type="dxa"/></w:tcMar>')
     tcPr.append(tcMar)
 
-# Title Header
+def format_cell_text(cell, text, bold=False, color_rgb=(15, 23, 42), font_size=9, align=WD_ALIGN_PARAGRAPH.CENTER):
+    p = cell.paragraphs[0]
+    p.alignment = align
+    p.paragraph_format.space_before = Pt(2)
+    p.paragraph_format.space_after = Pt(2)
+    r = p.add_run(text)
+    r.font.name = 'Calibri'
+    r.font.size = Pt(font_size)
+    r.font.bold = bold
+    r.font.color.rgb = RGBColor(*color_rgb)
+    return r
+
+doc = docx.Document()
+
+# Margens estreitas para caber perfeitamente
+for section in doc.sections:
+    section.top_margin = Inches(0.7)
+    section.bottom_margin = Inches(0.7)
+    section.left_margin = Inches(0.8)
+    section.right_margin = Inches(0.8)
+
+# Cabeçalho da Instituição / Curso
 p_inst = doc.add_paragraph()
-r_inst = p_inst.add_run('Curso TeSP em Gestão de Ambiente e Qualidade · Ensino Superior Politécnico\n')
+r_inst = p_inst.add_run('CURSO TÉCNICO SUPERIOR PROFISSIONAL (TeSP) — GESTÃO DE AMBIENTE E QUALIDADE\nLABORATÓRIO DE POLUIÇÃO SONORA E CONTROLO DE RUÍDO AMBIENTAL')
 r_inst.font.name = 'Calibri'
-r_inst.font.size = Pt(10)
+r_inst.font.size = Pt(9.5)
 r_inst.font.bold = True
-r_inst.font.color.rgb = RGBColor(100, 116, 139)
-
-r_uc = p_inst.add_run('Unidade Curricular: Controlo e Prevenção Ambiental / Acústica e Ruído')
-r_uc.font.name = 'Calibri'
-r_uc.font.size = Pt(9.5)
-r_uc.font.color.rgb = RGBColor(100, 116, 139)
+r_inst.font.color.rgb = RGBColor(71, 85, 105)
 p_inst.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p_inst.paragraph_format.space_after = Pt(4)
 
-# Document Main Title
+# Título Principal
 p_title = doc.add_paragraph()
-r_title = p_title.add_run('Guião Laboratorial Prático — Simulação de Mitigação de Ruído')
+r_title = p_title.add_run('Guião Prático: Princípios Físicos e Dimensionamento de Barreiras Acústicas')
 r_title.font.name = 'Calibri'
-r_title.font.size = Pt(18)
+r_title.font.size = Pt(15)
 r_title.font.bold = True
 r_title.font.color.rgb = RGBColor(15, 23, 42)
 p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_title.paragraph_format.space_after = Pt(2)
 
-# Subtitle / App Link
+# Subtítulo com link
 p_sub = doc.add_paragraph()
-r_sub = p_sub.add_run('Acesso ao Simulador Online: https://bmsasilva.github.io/app-cpa-barreiras-acusticas/')
+r_sub = p_sub.add_run('Acesso ao Simulador Interativo: https://bmsasilva.github.io/app-cpa-barreiras-acusticas/')
 r_sub.font.name = 'Calibri'
 r_sub.font.size = Pt(10)
 r_sub.font.bold = True
 r_sub.font.color.rgb = RGBColor(2, 132, 199)
 p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p_sub.paragraph_format.space_after = Pt(14)
+p_sub.paragraph_format.space_after = Pt(12)
 
-# Student Identification Box
+# Caixa de Identificação do Formando
 t_id = doc.add_table(rows=2, cols=2)
 t_id.alignment = WD_TABLE_ALIGNMENT.CENTER
 for r in t_id.rows:
     for c in r.cells:
         set_cell_background(c, 'F8FAFC')
-        set_cell_padding(c, 80, 80, 120, 120)
+        set_cell_padding(c, 70, 70, 100, 100)
 
 t_id.cell(0, 0).paragraphs[0].add_run('Nome do Aluno / Grupo: _____________________________________________').font.size = Pt(9.5)
 t_id.cell(0, 1).paragraphs[0].add_run('Turma / Ano: ____________________').font.size = Pt(9.5)
@@ -76,343 +80,273 @@ t_id.cell(1, 0).paragraphs[0].add_run('Data de Realização: ____ / ____ / 2026'
 t_id.cell(1, 1).paragraphs[0].add_run('Classificação / Rubrica: _________').font.size = Pt(9.5)
 doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
-# EXERCÍCIO 1
+# -------------------------------------------------------------
+# EXERCÍCIO 1: POSIÇÃO DA BARREIRA (X)
+# -------------------------------------------------------------
 p_ex1 = doc.add_paragraph()
-r_ex1 = p_ex1.add_run('EXERCÍCIO 1: A Posição Estratégica (X) da Barreira Acústica')
+r_ex1 = p_ex1.add_run('EXERCÍCIO 1: Influência da Posição da Barreira (X)')
 r_ex1.font.name = 'Calibri'
-r_ex1.font.size = Pt(13)
+r_ex1.font.size = Pt(12.5)
 r_ex1.font.bold = True
 r_ex1.font.color.rgb = RGBColor(30, 58, 138)
-p_ex1.paragraph_format.space_after = Pt(4)
+p_ex1.paragraph_format.space_after = Pt(2)
 
 p_ctx1 = doc.add_paragraph()
-r_ctx1 = p_ctx1.add_run('Contexto Profissional (Ambiente & Qualidade):\n')
-r_ctx1.font.bold = True
-r_ctx1.font.size = Pt(10)
 p_ctx1.add_run(
-    'Foste contratado como Técnico de Ambiente para avaliar a instalação de uma barreira acústica entre o foco ruidoso de uma fábrica (localizado a x = 0 m) e a fachada de uma habitação vizinha (localizada a x = 30 m). '
-    'A administração pretende saber onde é mais vantajoso construir a barreira: encostada à fábrica, no meio do terreno ou encostada à habitação.'
+    'Conceito: O efeito de sombra acústica de uma barreira depende da diferença de caminho ótico da onda sonora (Teorema de Maekawa). '
+    'Neste exercício, vamos fixar a barreira com altura constante (3.0 m) e material Betão Armado, variando apenas a sua posição horizontal no terreno '
+    'entre a fábrica (x = 0 m) e a habitação (x = 30 m).'
 ).font.size = Pt(9.5)
-p_ctx1.paragraph_format.space_after = Pt(6)
-
-p_obj1 = doc.add_paragraph()
-r_obj1 = p_obj1.add_run('Objetivos Pedagógicos:\n')
-r_obj1.font.bold = True
-r_obj1.font.size = Pt(10)
-p_obj1.add_run(
-    '1. Compreender o efeito da geometria e da quebra da linha de visão na atenuação por difração (Teorema de Maekawa).\n'
-    '2. Relacionar a eficácia acústica pura com o impacto social e visual nos moradores (Desagrado dos Moradores).'
-).font.size = Pt(9.5)
-p_obj1.paragraph_format.space_after = Pt(6)
+p_ctx1.paragraph_format.space_after = Pt(4)
 
 p_proc1 = doc.add_paragraph()
-r_proc1 = p_proc1.add_run('Procedimento no Simulador:')
+r_proc1 = p_proc1.add_run('Procedimento:')
 r_proc1.font.bold = True
-r_proc1.font.size = Pt(10)
+r_proc1.font.size = Pt(9.5)
 
 proc1_steps = [
-    'No painel direito, na aba "Fonte", confirma que a fonte é Pontual (Indústria), Potência = 95 dB, Frequência = 500 Hz, Altura = 1.5 m.',
-    'Na aba "Barreira", clica no botão "Desativada" para ATIVAR a barreira. Seleciona o material Betão Armado e fixa a altura em 3.0 m.',
-    'Testa as três posições da barreira indicadas na tabela abaixo (deslocando a barreira na imagem ou pelo deslizador) e anota os resultados exibidos na barra inferior e na aba Recetor.'
+    'Na aba "Fonte", confirma: Fonte Pontual (Indústria), Potência = 95 dB, Altura = 1.5 m.',
+    'Na aba "Barreira", clica no botão para ATIVAR a barreira. Fixa: Altura = 3.0 m, Material = Betão Armado.',
+    'Arrasta o cursor da "Posição da Barreira (X)" para as 3 posições da tabela abaixo e anota os valores registados na barra inferior e no painel Recetor.'
 ]
-for step in proc1_steps:
-    p_step = doc.add_paragraph(style='List Bullet')
-    p_step.add_run(step).font.size = Pt(9.5)
-    p_step.paragraph_format.space_after = Pt(2)
+for s in proc1_steps:
+    p_s = doc.add_paragraph(style='List Bullet')
+    p_s.add_run(s).font.size = Pt(9)
+    p_s.paragraph_format.space_after = Pt(2)
 
-# Tabela Ex 1
-doc.add_paragraph().paragraph_format.space_after = Pt(2)
-t1 = doc.add_table(rows=4, cols=6)
+t1 = doc.add_table(rows=4, cols=5)
 t1.alignment = WD_TABLE_ALIGNMENT.CENTER
-headers1 = ['Posição da Barreira (X)', 'Distância à Casa', 'Redução Efetiva (ΔL)', 'Nível no Recetor', 'Desagrado Moradores', 'Custo-Eficácia']
-
+headers1 = ['Posição (X)', 'Distância à Casa', 'Atenuação (ΔL)', 'Nível Recebido', 'Desagrado Moradores']
 for i, h in enumerate(headers1):
     c = t1.cell(0, i)
     set_cell_background(c, '1E293B')
-    set_cell_padding(c, 80, 80, 100, 100)
-    p = c.paragraphs[0]
-    r = p.add_run(h)
-    r.font.name = 'Calibri'
-    r.font.size = Pt(9)
-    r.font.bold = True
-    r.font.color.rgb = RGBColor(255, 255, 255)
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    set_cell_padding(c, 70, 70, 80, 80)
+    format_cell_text(c, h, bold=True, color_rgb=(255, 255, 255), font_size=8.5)
 
-rows_data1 = [
-    ('Cenário A: x = 4.0 m\n(Junto à Fonte)', '26.0 m', '', '', '', ''),
-    ('Cenário B: x = 15.0 m\n(A Meio Caminho)', '15.0 m', '', '', '', ''),
-    ('Cenário C: x = 26.0 m\n(Junto à Habitação)', '4.0 m', '', '', '', '')
+rows1 = [
+    ('Cenário A: x = 5.0 m (Junto à Fonte)', '25.0 m', '', '', ''),
+    ('Cenário B: x = 15.0 m (A Meio Caminho)', '15.0 m', '', '', ''),
+    ('Cenário C: x = 26.0 m (Junto à Casa)', '4.0 m', '', '', '')
 ]
+for r_idx, r_data in enumerate(rows1, start=1):
+    for c_idx, val in enumerate(r_data):
+        c = t1.cell(r_idx, c_idx)
+        set_cell_background(c, 'F8FAFC' if r_idx % 2 == 1 else 'FFFFFF')
+        set_cell_padding(c, 80, 80, 80, 80)
+        format_cell_text(c, val, bold=(c_idx == 0), font_size=8.5, align=WD_ALIGN_PARAGRAPH.LEFT if c_idx == 0 else WD_ALIGN_PARAGRAPH.CENTER)
 
-for row_idx, r_data in enumerate(rows_data1, start=1):
-    for col_idx, val in enumerate(r_data):
-        c = t1.cell(row_idx, col_idx)
-        set_cell_background(c, 'F8FAFC' if row_idx % 2 == 1 else 'FFFFFF')
-        set_cell_padding(c, 100, 100, 80, 80)
-        p = c.paragraphs[0]
-        r = p.add_run(val)
-        r.font.name = 'Calibri'
-        r.font.size = Pt(9)
-        if col_idx == 0:
-            r.font.bold = True
-            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        else:
-            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p_q1 = doc.add_paragraph()
+p_q1.paragraph_format.space_before = Pt(6)
+p_q1.add_run(
+    'Questão 1.1: Em qual das três posições a atenuação acústica (ΔL) foi mais fraca? Porque é que o ponto médio (x = 15 m) é a pior posição física?\n'
+    'Resposta: _____________________________________________________________________________________\n\n'
+    'Questão 1.2: Os Cenários A (x = 5 m) e C (x = 26 m) têm atenuações acústicas semelhantes. Contudo, porque é que um Técnico de Ambiente deve rejeitar de imediato a colocação a x = 26 m? Observa o valor de Desagrado dos Moradores.\n'
+    'Resposta: _____________________________________________________________________________________'
+).font.size = Pt(9.5)
+p_q1.paragraph_format.space_after = Pt(8)
 
-# Questões Ex 1
-p_q1_title = doc.add_paragraph()
-p_q1_title.paragraph_format.space_before = Pt(8)
-r_q1_title = p_q1_title.add_run('Questões de Análise e Decisão Técnica:')
-r_q1_title.font.bold = True
-r_q1_title.font.size = Pt(10)
-
-q1_list = [
-    '1.1. Eficácia Acústica: Em qual das três posições a redução sonora efetiva (ΔL) é menor? Com base na forma como a onda contorna o topo da barreira, explica porque é que o ponto médio (x = 15 m) é a pior escolha acústica.\nResposta: _____________________________________________________________________________________\n_____________________________________________________________________________________________',
-    '1.2. Decisão de Gestão Ambiental: Os Cenários A (x = 4 m) e C (x = 26 m) oferecem uma redução em decibéis semelhante. Contudo, do ponto de vista do impacto visual e da aceitação da população, qual deles deves rejeitar imediatamente? Justifica com base no indicador de Desagrado dos Moradores.\nResposta: _____________________________________________________________________________________\n_____________________________________________________________________________________________'
-]
-for q in q1_list:
-    p_q = doc.add_paragraph()
-    p_q.add_run(q).font.size = Pt(9.5)
-    p_q.paragraph_format.space_after = Pt(4)
-
+# -------------------------------------------------------------
+# EXERCÍCIO 2: ALTURA DA BARREIRA (H) E LINHA DE VISÃO
+# -------------------------------------------------------------
 doc.add_page_break()
-
-# EXERCÍCIO 2
 p_ex2 = doc.add_paragraph()
-r_ex2 = p_ex2.add_run('EXERCÍCIO 2: Propagação com a Distância — Indústria (Fixa) vs. Estrada (Móvel)')
+r_ex2 = p_ex2.add_run('EXERCÍCIO 2: Influência da Altura (H) e Linha de Visão')
 r_ex2.font.name = 'Calibri'
-r_ex2.font.size = Pt(13)
+r_ex2.font.size = Pt(12.5)
 r_ex2.font.bold = True
 r_ex2.font.color.rgb = RGBColor(30, 58, 138)
-p_ex2.paragraph_format.space_after = Pt(4)
+p_ex2.paragraph_format.space_after = Pt(2)
 
 p_ctx2 = doc.add_paragraph()
-r_ctx2 = p_ctx2.add_run('Contexto Profissional (Ambiente & Qualidade):\n')
-r_ctx2.font.bold = True
-r_ctx2.font.size = Pt(10)
 p_ctx2.add_run(
-    'No âmbito do licenciamento ambiental e do Regulamento Geral do Ruído (Decreto-Lei n.º 9/2007), um Técnico de Ambiente deve conhecer '
-    'como o som viaja no território em função da natureza da fonte. Uma fonte concentrada num ponto (como um motor ou chaminé) dissipa a energia de forma diferente '
-    'de uma via rodoviária, onde circula um fluxo contínuo de viaturas em movimento.'
+    'Conceito: Para uma barreira produzir sombra acústica significativa, ela tem de intercetar a linha direta de visão (Line of Sight) entre o foco sonoro '
+    'e o recetor humano. Vamos fixar a posição em x = 5.0 m (material Betão Armado) e aumentar progressivamente a altura da barreira.'
 ).font.size = Pt(9.5)
-p_ctx2.paragraph_format.space_after = Pt(6)
-
-p_obj2 = doc.add_paragraph()
-r_obj2 = p_obj2.add_run('Objetivos Pedagógicos:\n')
-r_obj2.font.bold = True
-r_obj2.font.size = Pt(10)
-p_obj2.add_run(
-    '1. Diferenciar a propagação em onda esférica (fonte pontual) da propagação em onda cilíndrica (fonte linear).\n'
-    '2. Comprovar na prática a regra dos -6 dB vs. -3 dB por cada duplicação da distância e as suas consequências no ordenamento do território.'
-).font.size = Pt(9.5)
-p_obj2.paragraph_format.space_after = Pt(6)
+p_ctx2.paragraph_format.space_after = Pt(4)
 
 p_proc2 = doc.add_paragraph()
-r_proc2 = p_proc2.add_run('Procedimento no Simulador:')
+r_proc2 = p_proc2.add_run('Procedimento:')
 r_proc2.font.bold = True
-r_proc2.font.size = Pt(10)
+r_proc2.font.size = Pt(9.5)
 
 proc2_steps = [
-    'Na aba "Barreira", confirma que a barreira está no estado "Desativada" (queremos analisar apenas a propagação livre pelo terreno).',
-    'Na aba "Fonte", verifica que a Potência Sonora está no valor inicial de 95 dB e a Frequência em 500 Hz.',
-    'Passo A (Fonte Fixa): Seleciona o botão "Fonte Pontual (Indústria / Fábrica)". Observa a imagem 2D e regista na aba "Recetor" o nível sonoro que atinge a fachada a 30 m.',
-    'Passo B (Fonte Móvel): Sem mexer na potência nem na distância, clica no botão "Fonte Linear (Estrada / Tráfego)". Observa a alteração no nível que atinge a habitação a 30 m.'
+    'Mantém a Fonte a 95 dB e a Barreira na posição x = 5.0 m.',
+    'Testa as 4 alturas indicadas na tabela abaixo e observa no gráfico 2D quando é que a linha de visão é cortada.',
+    'Regista a atenuação obtida e a variação do impacto visual nos moradores.'
 ]
-for step in proc2_steps:
-    p_step = doc.add_paragraph(style='List Bullet')
-    p_step.add_run(step).font.size = Pt(9.5)
-    p_step.paragraph_format.space_after = Pt(2)
+for s in proc2_steps:
+    p_s = doc.add_paragraph(style='List Bullet')
+    p_s.add_run(s).font.size = Pt(9)
+    p_s.paragraph_format.space_after = Pt(2)
 
-# Tabela Ex 2
-doc.add_paragraph().paragraph_format.space_after = Pt(2)
-t2 = doc.add_table(rows=3, cols=5)
+t2 = doc.add_table(rows=5, cols=5)
 t2.alignment = WD_TABLE_ALIGNMENT.CENTER
-headers2 = ['Tipo de Fonte Sonora', 'Modelo Físico da Onda', 'Potência na Origem', 'Nível Recebido (a 30 m)', 'Atenuação ao Duplicar Distância']
+headers2 = ['Altura da Barreira (H)', 'Corta Linha de Visão?', 'Atenuação (ΔL)', 'Nível no Recetor', 'Desagrado Moradores']
 for i, h in enumerate(headers2):
     c = t2.cell(0, i)
     set_cell_background(c, '1E293B')
-    set_cell_padding(c, 80, 80, 100, 100)
-    p = c.paragraphs[0]
-    r = p.add_run(h)
-    r.font.name = 'Calibri'
-    r.font.size = Pt(9)
-    r.font.bold = True
-    r.font.color.rgb = RGBColor(255, 255, 255)
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    set_cell_padding(c, 70, 70, 80, 80)
+    format_cell_text(c, h, bold=True, color_rgb=(255, 255, 255), font_size=8.5)
 
-rows_data2 = [
-    ('Fonte Pontual (Fixa)\nEx.: Compressor / Chaminé', 'Esférica (Hemisférica no solo)', '95 dB @ 500 Hz', '', '-6 dB por duplicação (20 log10 r)'),
-    ('Fonte Linear (Móvel)\nEx.: Estrada com tráfego', 'Cilíndrica ao longo da via', '95 dB @ 500 Hz', '', '-3 dB por duplicação (10 log10 r)')
+rows2 = [
+    ('H = 1.0 m (Baixa)', '', '', '', ''),
+    ('H = 1.8 m (Ao nível dos olhos)', '', '', '', ''),
+    ('H = 2.5 m (Média)', '', '', '', ''),
+    ('H = 4.0 m (Muito alta)', '', '', '', '')
 ]
+for r_idx, r_data in enumerate(rows2, start=1):
+    for c_idx, val in enumerate(r_data):
+        c = t2.cell(r_idx, c_idx)
+        set_cell_background(c, 'F8FAFC' if r_idx % 2 == 1 else 'FFFFFF')
+        set_cell_padding(c, 80, 80, 80, 80)
+        format_cell_text(c, val, bold=(c_idx == 0), font_size=8.5, align=WD_ALIGN_PARAGRAPH.LEFT if c_idx == 0 else WD_ALIGN_PARAGRAPH.CENTER)
 
-for row_idx, r_data in enumerate(rows_data2, start=1):
-    for col_idx, val in enumerate(r_data):
-        c = t2.cell(row_idx, col_idx)
-        set_cell_background(c, 'F8FAFC' if row_idx % 2 == 1 else 'FFFFFF')
-        set_cell_padding(c, 100, 100, 80, 80)
-        p = c.paragraphs[0]
-        r = p.add_run(val)
-        r.font.name = 'Calibri'
-        r.font.size = Pt(9)
-        if col_idx == 0:
-            r.font.bold = True
-            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        elif col_idx in [1, 4]:
-            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        else:
-            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p_q2 = doc.add_paragraph()
+p_q2.paragraph_format.space_before = Pt(6)
+p_q2.add_run(
+    'Questão 2.1: Com a barreira a 1.0 m de altura, que redução acústica foi obtida? Por que razão uma barreira que não quebra a linha de visão é ineficaz?\n'
+    'Resposta: _____________________________________________________________________________________\n\n'
+    'Questão 2.2: Ao subir de 2.5 m para 4.0 m de altura, a atenuação aumentou quantos decibéis? Compensa duplicar a altura da estrutura para obter este ganho? '
+    'Considera o impacto estético (Desagrado dos Moradores).\n'
+    'Resposta: _____________________________________________________________________________________'
+).font.size = Pt(9.5)
+p_q2.paragraph_format.space_after = Pt(8)
 
-# Questões Ex 2
-p_q2_title = doc.add_paragraph()
-p_q2_title.paragraph_format.space_before = Pt(8)
-r_q2_title = p_q2_title.add_run('Questões de Análise e Decisão Técnica:')
-r_q2_title.font.bold = True
-r_q2_title.font.size = Pt(10)
-
-q2_list = [
-    '2.1. Comparação Direta de Níveis: Com exatamente a mesma potência sonora inicial (95 dB) e à mesma distância de 30 metros, qual foi a diferença em decibéis entre o ruído da estrada e o ruído da fábrica? Qual dos dois chega muito mais forte à habitação?\nResposta: _____________________________________________________________________________________\n_____________________________________________________________________________________________',
-    '2.2. O Porquê Físico: Porque é que o ruído de uma via rápida não se dissipa tão rapidamente como o de um motor industrial isolado? (Dica: pensa no facto de na estrada haver uma linha contínua de dezenas de veículos cujas frentes de onda cilíndricas se sobrepõem).\nResposta: _____________________________________________________________________________________\n_____________________________________________________________________________________________',
-    '2.3. Gestão e Ordenamento do Território: Se uma câmara municipal estiver a planear a construção de uma nova zona residencial, porque é que é muito mais fácil resolver o ruído afastando as casas 20 metros de uma zona industrial do que afastá-las 20 metros de uma autoestrada?\nResposta: _____________________________________________________________________________________\n_____________________________________________________________________________________________'
-]
-for q in q2_list:
-    p_q = doc.add_paragraph()
-    p_q.add_run(q).font.size = Pt(9.5)
-    p_q.paragraph_format.space_after = Pt(4)
-
+# -------------------------------------------------------------
+# EXERCÍCIO 3: MATERIAL E TRANSMISSÃO DO SOM
+# -------------------------------------------------------------
 doc.add_page_break()
-
-# EXERCÍCIO 3 / DESAFIO DE PROJETO
 p_ex3 = doc.add_paragraph()
-r_ex3 = p_ex3.add_run('EXERCÍCIO 3 (DESAFIO DE PROJETO): Otimização Técnico-Económica sob Orçamento Estrito')
+r_ex3 = p_ex3.add_run('EXERCÍCIO 3: O Papel do Material e do Isolamento (R)')
 r_ex3.font.name = 'Calibri'
-r_ex3.font.size = Pt(13)
+r_ex3.font.size = Pt(12.5)
 r_ex3.font.bold = True
-r_ex3.font.color.rgb = RGBColor(180, 83, 9)
-p_ex3.paragraph_format.space_after = Pt(4)
+r_ex3.font.color.rgb = RGBColor(30, 58, 138)
+p_ex3.paragraph_format.space_after = Pt(2)
 
 p_ctx3 = doc.add_paragraph()
-r_ctx3 = p_ctx3.add_run('O Desafio de Engenharia e Gestão da Qualidade:\n')
-r_ctx3.font.bold = True
-r_ctx3.font.size = Pt(10)
 p_ctx3.add_run(
-    'A administração de uma empresa metalomecânica foi notificada pelo município com um auto de contraordenação devido a ruído ambiental excessivo. '
-    'A fábrica emite ruído contínuo a 95 dB (@ 500 Hz, fonte pontual a 1.5 m de altura). Na habitação vizinha (a 30 m de distância, com recetor a 1.5 m de altura), '
-    'o sonómetro regista atualmente 65.5 dB sem qualquer barreira, violando os limites regulamentares.\n\n'
-    'Como Técnico de Ambiente e Qualidade, foste encarregado de projetar uma barreira acústica (comprimento de 20 m). '
-    'O Conselho de Administração aprovou uma verba orçamental máxima e o Município impôs restrições sociais rigorosas. '
-    'Tens de dimensionar os 4 parâmetros da barreira: Material Construtivo, Espessura (e), Altura (h) e Posição (X).'
+    'Conceito: O som que chega à habitação segue dois caminhos: o som que contorna o topo (difração) e o som que atravessa a própria parede (transmissão). '
+    'Se o material for muito leve ou fino, o som perfura a barreira, estragando todo o benefício da sombra acústica (Índice de Redução Sonora R insuficiente).'
 ).font.size = Pt(9.5)
-p_ctx3.paragraph_format.space_after = Pt(6)
+p_ctx3.paragraph_format.space_after = Pt(4)
 
-# Caixas de Requisitos Obrigatórios
-p_req_title = doc.add_paragraph()
-r_req_title = p_req_title.add_run('As 4 Condições Obrigatórias de Aprovação (Critérios Eliminatórios):')
-r_req_title.font.bold = True
-r_req_title.font.size = Pt(10)
-p_req_title.paragraph_format.space_after = Pt(4)
+p_proc3 = doc.add_paragraph()
+r_proc3 = p_proc3.add_run('Procedimento:')
+r_proc3.font.bold = True
+r_proc3.font.size = Pt(9.5)
 
-reqs = [
-    ('1. Critério Acústico Legal (Obrigatório):', ' O nível sonoro recebido na habitação com a barreira tem de descer para ≤ 55.0 dB (o que exige uma Redução Efetiva líquida de ΔL ≥ 10.5 dB).'),
-    ('2. Critério Orçamental Máximo (Teto Estrito):', ' O Custo Total da barreira NÃO PODE ULTRAPASSAR os 5.000 € (cinco mil euros). Propostas com custo superior a 5.000 € são chumbadas pela administração.'),
-    ('3. Critério Social e Visual (Consulta Pública):', ' O Desagrado dos Moradores tem de ser inferior a 30% (nível "Baixo Impacto" verde ou "Impacto Moderado" inicial). Propostas com classificação laranja ou vermelha são rejeitadas pela população.'),
-    ('4. Critério de Segurança e Servidão Fabril (NOVO):', ' A barreira NÃO PODE ser instalada a menos de 5.0 metros da fonte (X ≥ 5.0 m). Justificação: corredor obrigatório de segurança contra incêndios, manutenção de máquinas e manobra de empilhadores. Propostas com X < 5.0 m são automaticamente desclassificadas.')
+proc3_steps = [
+    'Fixa a Barreira na posição x = 5.0 m e com Altura = 3.0 m.',
+    'Na aba "Barreira", altera sucessivamente o tipo de material e preenche a tabela.',
+    'Nota as diferenças no Isolamento Acústico (R) e na reação estética dos moradores.'
 ]
-for title_r, desc_r in reqs:
-    p_r = doc.add_paragraph(style='List Bullet')
-    r1 = p_r.add_run(title_r)
-    r1.font.bold = True
-    r1.font.size = Pt(9.5)
-    p_r.add_run(desc_r).font.size = Pt(9.5)
-    p_r.paragraph_format.space_after = Pt(2)
+for s in proc3_steps:
+    p_s = doc.add_paragraph(style='List Bullet')
+    p_s.add_run(s).font.size = Pt(9)
+    p_s.paragraph_format.space_after = Pt(2)
 
-# As Armadilhas do Problema
-p_traps_title = doc.add_paragraph()
-p_traps_title.paragraph_format.space_before = Pt(6)
-r_traps_title = p_traps_title.add_run('Atenção às Armadilhas Comuns no Simulador:')
-r_traps_title.font.bold = True
-r_traps_title.font.size = Pt(10)
-r_traps_title.font.color.rgb = RGBColor(185, 28, 28)
-
-traps = [
-    'A Chapa Metálica parece muito barata (< 3.000 €), mas com a espessura padrão (2 mm) tem uma massa superficial tão fraca que o som perfura o material por transmissão direta, falhando a meta acústica dos 55 dB!',
-    'O Betão Armado e o Painel Absorvente têm excelente isolamento, mas com espessuras padrão e alturas normais custam facilmente mais de 7.000 € a 9.000 €, estourando o limite financeiro dos 5.000 €!',
-    'Se tentares colar a barreira à fonte (ex.: x = 2 m a 4 m), a proposta é chumbada pelo critério de segurança fabril (X tem de ser ≥ 5.0 m)!',
-    'Se colocares a barreira muito perto da casa (ex.: x = 25 m a 28 m) para poupares em altura, o Desagrado dos Moradores dispara para mais de 60% a 90% (efeito muralha), e o projeto é chumbado pela comunidade!',
-    'O Ponto Ótimo: Vais ter de posicionar a barreira a partir dos 5.0 m, testar a Madeira Tratada ou ajustar com precisão a espessura e a altura para vencer o concurso com o melhor Custo-Eficácia (€/dB)!'
-]
-for t in traps:
-    p_t = doc.add_paragraph(style='List Bullet')
-    p_t.add_run(t).font.size = Pt(9)
-    p_t.paragraph_format.space_after = Pt(2)
-
-# Tabela de Propostas do Aluno
-p_tab3_title = doc.add_paragraph()
-p_tab3_title.paragraph_format.space_before = Pt(8)
-r_tab3_title = p_tab3_title.add_run('Registo de Propostas no "Comparador de Soluções" (Guarda no Slot A e Slot B antes da Solução Final):')
-r_tab3_title.font.bold = True
-r_tab3_title.font.size = Pt(9.5)
-
-t3 = doc.add_table(rows=4, cols=8)
+t3 = doc.add_table(rows=6, cols=5)
 t3.alignment = WD_TABLE_ALIGNMENT.CENTER
-headers3 = ['Proposta', 'Material', 'Espessura (e)', 'Altura (h)', 'Posição (X)', 'Nível (dB)', 'Desagrado (%)', 'Custo Total (€)']
+headers3 = ['Material da Barreira', 'Isolamento (R)', 'Atenuação (ΔL)', 'Nível Recebido', 'Desagrado Moradores']
 for i, h in enumerate(headers3):
     c = t3.cell(0, i)
     set_cell_background(c, '1E293B')
-    set_cell_padding(c, 80, 80, 60, 60)
-    p = c.paragraphs[0]
-    r = p.add_run(h)
-    r.font.name = 'Calibri'
-    r.font.size = Pt(8.5)
-    r.font.bold = True
-    r.font.color.rgb = RGBColor(255, 255, 255)
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    set_cell_padding(c, 70, 70, 80, 80)
+    format_cell_text(c, h, bold=True, color_rgb=(255, 255, 255), font_size=8.5)
 
-rows_data3 = [
-    ('Tentativa 1\n(Slot A)', '', '', '', '', '', '', ''),
-    ('Tentativa 2\n(Slot B)', '', '', '', '', '', '', ''),
-    ('PROPOSTA FINAL\nVencedora', '', '', '', '', '', '', '')
+rows3 = [
+    ('Chapa Metálica (2 mm)', '', '', '', ''),
+    ('Madeira Tratada', '', '', '', ''),
+    ('Betão Armado (15 cm)', '', '', '', ''),
+    ('Painel Absorvente', '', '', '', ''),
+    ('Acrílico Transparente', '', '', '', '')
 ]
+for r_idx, r_data in enumerate(rows3, start=1):
+    for c_idx, val in enumerate(r_data):
+        c = t3.cell(r_idx, c_idx)
+        set_cell_background(c, 'F8FAFC' if r_idx % 2 == 1 else 'FFFFFF')
+        set_cell_padding(c, 80, 80, 80, 80)
+        format_cell_text(c, val, bold=(c_idx == 0), font_size=8.5, align=WD_ALIGN_PARAGRAPH.LEFT if c_idx == 0 else WD_ALIGN_PARAGRAPH.CENTER)
 
-for row_idx, r_data in enumerate(rows_data3, start=1):
-    for col_idx, val in enumerate(r_data):
-        c = t3.cell(row_idx, col_idx)
-        set_cell_background(c, 'FEF3C7' if row_idx == 3 else ('F8FAFC' if row_idx % 2 == 1 else 'FFFFFF'))
-        set_cell_padding(c, 80, 80, 60, 60)
-        p = c.paragraphs[0]
-        r = p.add_run(val)
-        r.font.name = 'Calibri'
-        r.font.size = Pt(8.5)
-        if col_idx == 0:
-            r.font.bold = True
-            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        else:
-            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p_q3 = doc.add_paragraph()
+p_q3.paragraph_format.space_before = Pt(6)
+p_q3.add_run(
+    'Questão 3.1: Porque é que a Chapa Metálica de 2 mm tem pior desempenho acústico do que o Betão, mesmo tendo exatamente a mesma altura (3.0 m)? '
+    'Qual dos dois caminhos do som (difração ou transmissão) causou a fuga de ruído?\n'
+    'Resposta: _____________________________________________________________________________________\n\n'
+    'Questão 3.2: O Acrílico Transparente tem um nível sonoro muito semelhante ao da Madeira. Contudo, em termos de Desagrado dos Moradores, '
+    'o Acrílico apresenta um valor muito mais favorável. Por que razão a transparência do material reduz a rejeição da população?\n'
+    'Resposta: _____________________________________________________________________________________'
+).font.size = Pt(9.5)
+p_q3.paragraph_format.space_after = Pt(8)
 
-# Questões de Justificação do Projeto
-p_q3_title = doc.add_paragraph()
-p_q3_title.paragraph_format.space_before = Pt(8)
-r_q3_title = p_q3_title.add_run('Parecer Técnico de Justificação à Administração:')
-r_q3_title.font.bold = True
-r_q3_title.font.size = Pt(10)
+# -------------------------------------------------------------
+# EXERCÍCIO 4: FONTE PONTUAL VS FONTE LINEAR
+# -------------------------------------------------------------
+doc.add_page_break()
+p_ex4 = doc.add_paragraph()
+r_ex4 = p_ex4.add_run('EXERCÍCIO 4: Propagação no Solo — Indústria (Pontual) vs. Estrada (Linear)')
+r_ex4.font.name = 'Calibri'
+r_ex4.font.size = Pt(12.5)
+r_ex4.font.bold = True
+r_ex4.font.color.rgb = RGBColor(30, 58, 138)
+p_ex4.paragraph_format.space_after = Pt(2)
 
-q3_list = [
-    '3.1. Justificação do Material e Espessura: Qual foi o material e espessura que selecionaste para a solução vencedora? Porque é que materiais muito mais caros (como Acrílico ou Absorvente padrão) ou muito mais baratos (Chapa fina de 2 mm) foram descartados na tua análise?\nResposta: _____________________________________________________________________________________\n_____________________________________________________________________________________________',
-    '3.2. Justificação da Posição (X) e Altura (h): Onde escolheste implantar a barreira e com que altura? Como conseguiste garantir simultaneamente que a redução acústica atingiu pelo menos ΔL ≥ 10.5 dB sem que o Desagrado dos Moradores ultrapassasse os 30%?\nResposta: _____________________________________________________________________________________\n_____________________________________________________________________________________________',
-    '3.3. Avaliação de Eficiência Financeira: Qual é o valor final do indicador de Custo-Eficácia (€/dB) da tua proposta vencedora? Como usarias este valor para convencer o Diretor Financeiro de que este projeto representa a melhor relação qualidade/preço do mercado?\nResposta: _____________________________________________________________________________________\n_____________________________________________________________________________________________'
+p_ctx4 = doc.add_paragraph()
+p_ctx4.add_run(
+    'Conceito: Uma fonte pontual (como um motor, chaminé ou compressor) dissipa a energia sonórica em onda esférica (-6 dB por duplicação da distância). '
+    'Uma via rodoviária movimentada comporta-se como uma linha contínua de veículos, dissipando energia em onda cilíndrica (-3 dB por duplicação da distância).'
+).font.size = Pt(9.5)
+p_ctx4.paragraph_format.space_after = Pt(4)
+
+p_proc4 = doc.add_paragraph()
+r_proc4 = p_proc4.add_run('Procedimento:')
+r_proc4.font.bold = True
+r_proc4.font.size = Pt(9.5)
+
+proc4_steps = [
+    'Na aba "Barreira", DESATIVA a barreira para medir o som em campo livre (sem obstáculos).',
+    'Na aba "Fonte", verifica que a Potência é 95 dB e a Frequência é 500 Hz.',
+    'Alterna entre "Fonte Pontual (Indústria)" e "Fonte Linear (Estrada)" e regista o som recebido na fachada a 30 metros.'
 ]
-for q in q3_list:
-    p_q = doc.add_paragraph()
-    p_q.add_run(q).font.size = Pt(9.5)
-    p_q.paragraph_format.space_after = Pt(4)
+for s in proc4_steps:
+    p_s = doc.add_paragraph(style='List Bullet')
+    p_s.add_run(s).font.size = Pt(9)
+    p_s.paragraph_format.space_after = Pt(2)
 
-# Footer Note
-p_foot = doc.add_paragraph()
-p_foot.paragraph_format.space_before = Pt(8)
-r_foot = p_foot.add_run('Nota Técnica: Documento pedagógico desenvolvido para aplicação prática com o Simulador Interativo CPA de Barreiras Acústicas.')
-r_foot.font.size = Pt(8)
-r_foot.font.italic = True
-r_foot.font.color.rgb = RGBColor(148, 163, 184)
-p_foot.alignment = WD_ALIGN_PARAGRAPH.CENTER
+t4 = doc.add_table(rows=3, cols=4)
+t4.alignment = WD_TABLE_ALIGNMENT.CENTER
+headers4 = ['Tipo de Foco Sonoro', 'Modelo de Onda', 'Nível Recebido (a 30 m)', 'Atenuação Geométrica Teórica']
+for i, h in enumerate(headers4):
+    c = t4.cell(0, i)
+    set_cell_background(c, '1E293B')
+    set_cell_padding(c, 70, 70, 80, 80)
+    format_cell_text(c, h, bold=True, color_rgb=(255, 255, 255), font_size=8.5)
 
+rows4 = [
+    ('Fonte Pontual (Indústria / Fábrica)', 'Esférica (Hemisférica)', '', '-6 dB por cada duplicação da distância (20 log r)'),
+    ('Fonte Linear (Estrada / Tráfego)', 'Cilíndrica ao longo da via', '', '-3 dB por cada duplicação da distância (10 log r)')
+]
+for r_idx, r_data in enumerate(rows4, start=1):
+    for c_idx, val in enumerate(r_data):
+        c = t4.cell(r_idx, c_idx)
+        set_cell_background(c, 'F8FAFC' if r_idx % 2 == 1 else 'FFFFFF')
+        set_cell_padding(c, 80, 80, 80, 80)
+        format_cell_text(c, val, bold=(c_idx == 0), font_size=8.5, align=WD_ALIGN_PARAGRAPH.LEFT if c_idx in [0, 1, 3] else WD_ALIGN_PARAGRAPH.CENTER)
+
+p_q4 = doc.add_paragraph()
+p_q4.paragraph_format.space_before = Pt(6)
+p_q4.add_run(
+    'Questão 4.1: Com a mesma potência na origem (95 dB), qual é a diferença em decibéis entre o ruído que chega da fábrica e o que chega da estrada? '
+    'Qual dos dois focos de ruído requer barreiras muito mais exigentes?\n'
+    'Resposta: _____________________________________________________________________________________\n\n'
+    'Questão 4.2: Do ponto de vista de planeamento urbano e ambiente, porque é que afastar as casas 20 metros de uma fábrica reduz o ruído de forma muito mais drástica '
+    'do que afastá-las 20 metros de uma autoestrada?\n'
+    'Resposta: _____________________________________________________________________________________'
+).font.size = Pt(9.5)
+p_q4.paragraph_format.space_after = Pt(8)
+
+# Guardar documento
 doc.save('Exercicios_Acustica_CPA.docx')
-print('Word document updated successfully with Challenge 3: Exercicios_Acustica_CPA.docx')
+print('Documento atualizado com sucesso: Exercicios_Acustica_CPA.docx (4 Exercícios Conceituais)')
