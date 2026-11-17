@@ -115,6 +115,7 @@ export const SolutionsComparison: React.FC<SolutionsComparisonProps> = ({
               <th className="py-2.5 px-3">Nível Estimado</th>
               <th className="py-2.5 px-3">Redução (ΔL)</th>
               <th className="py-2.5 px-3">Isolamento (R)</th>
+              <th className="py-2.5 px-3">Desagrado</th>
               <th className="py-2.5 px-3">Custo Fictício</th>
               <th className="py-2.5 px-3">Custo-Eficácia</th>
               <th className="py-2.5 px-3 text-right">Ações</th>
@@ -138,6 +139,12 @@ export const SolutionsComparison: React.FC<SolutionsComparisonProps> = ({
                 -{currentResult.netReduction.toFixed(1)} dB
               </td>
               <td className="py-2.5 px-3 font-mono">{currentResult.materialTransmissionLoss} dB</td>
+              <td className="py-2.5 px-3 font-mono font-bold" style={{ color: currentResult.residentAnnoyance.color }}>
+                {currentResult.residentAnnoyance.score}%
+                <span className="text-[10px] text-slate-400 font-normal ml-1">
+                  ({currentResult.residentAnnoyance.label.split(' ')[0]})
+                </span>
+              </td>
               <td className="py-2.5 px-3 font-mono text-amber-400">
                 {currentResult.totalCostEuro.toLocaleString('pt-PT')} €
               </td>
@@ -155,7 +162,7 @@ export const SolutionsComparison: React.FC<SolutionsComparisonProps> = ({
                 return (
                   <tr key={slot} className="text-slate-500 italic">
                     <td className="py-2.5 px-3 font-bold text-slate-500">Slot {slot}</td>
-                    <td colSpan={8} className="py-2.5 px-3">
+                    <td colSpan={9} className="py-2.5 px-3">
                       Slot vazio. Clica em "Guardar como: Slot {slot}" para registar a solução atual.
                     </td>
                     <td className="py-2.5 px-3 text-right">-</td>
@@ -184,6 +191,12 @@ export const SolutionsComparison: React.FC<SolutionsComparisonProps> = ({
                     -{sol.result.netReduction.toFixed(1)} dB
                   </td>
                   <td className="py-2.5 px-3 font-mono">{sol.result.materialTransmissionLoss} dB</td>
+                  <td className="py-2.5 px-3 font-mono font-bold" style={{ color: sol.result.residentAnnoyance.color }}>
+                    {sol.result.residentAnnoyance.score}%
+                    <span className="text-[10px] text-slate-400 font-normal ml-1">
+                      ({sol.result.residentAnnoyance.label.split(' ')[0]})
+                    </span>
+                  </td>
                   <td className="py-2.5 px-3 font-mono text-amber-400">
                     {sol.result.totalCostEuro.toLocaleString('pt-PT')} €
                   </td>
@@ -292,6 +305,15 @@ export const SolutionsComparison: React.FC<SolutionsComparisonProps> = ({
                   </span>
                 </div>
                 <div className="flex justify-between text-slate-300">
+                  <span>Desagrado Moradores:</span>
+                  <span className="font-mono font-bold" style={{ color: sol1Data.result.residentAnnoyance.color }}>
+                    {sol1Data.result.residentAnnoyance.score}%
+                    <span className="text-[11px] font-normal text-slate-400 ml-1">
+                      ({sol1Data.result.residentAnnoyance.label})
+                    </span>
+                  </span>
+                </div>
+                <div className="flex justify-between text-slate-300">
                   <span>Custo Total:</span>
                   <span className="font-mono font-bold text-amber-400">
                     {sol1Data.result.totalCostEuro.toLocaleString('pt-PT')} €
@@ -336,6 +358,15 @@ export const SolutionsComparison: React.FC<SolutionsComparisonProps> = ({
                   <span>Redução (ΔL):</span>
                   <span className="font-mono font-bold text-sky-400">
                     -{sol2Data.result.netReduction.toFixed(1)} dB
+                  </span>
+                </div>
+                <div className="flex justify-between text-slate-300">
+                  <span>Desagrado Moradores:</span>
+                  <span className="font-mono font-bold" style={{ color: sol2Data.result.residentAnnoyance.color }}>
+                    {sol2Data.result.residentAnnoyance.score}%
+                    <span className="text-[11px] font-normal text-slate-400 ml-1">
+                      ({sol2Data.result.residentAnnoyance.label})
+                    </span>
                   </span>
                 </div>
                 <div className="flex justify-between text-slate-300">
